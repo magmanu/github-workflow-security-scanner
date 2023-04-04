@@ -23,6 +23,7 @@ runs:
     - uses: actions/checkout@v3
       with:
         repository: 'magmanu/github-workflow-scanner'
+        ref: 'migration'
     
     - name: Install Dependencies
       run: |
