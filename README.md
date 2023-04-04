@@ -4,6 +4,12 @@
 
 This tool (GWoSS) identifies vulnerability in GitHub Workflows, like a SAST. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
 
+## Features
+
+- **Security Scanning**: Checks all workflows in a specific branch (e.g., current branch)
+- **CI**: Option to break the pipeline if workflow is vulnerable
+- **Reporting**: Shows vulnerability report and suggested remediation on pipeline log
+
 ## Usage
 
 Example of workflow that uses this action.  
@@ -28,15 +34,11 @@ jobs:
 
 ```
 
-## Features
 
-## v0.0.1
-- Scans all workflows in the branch that performs a `push`
-- Option to run scan on a specified `BRANCH` instead
-- Shows vulnerability report and suggested remediation on pipeline log
-- Option to break pipeline if workflow is vulnerable
+## What checks are currently in place?
 
-## To do
+See them [here](scan_config.json)
+## To do: Wanna Collaborate?
 
 - [ ] [Feat] Enable org/user scan
 - [ ] [Feat] Add `result.md` to PR comment
@@ -44,11 +46,6 @@ jobs:
 - [ ] [Feat] Add supply chain to `result.md` table and vulnerability count
 - [ ] [Chore] Improve how `result.md` is created
 - [ ] [Chore] Add testing
-
-
-## What checks are currently in place?
-
-See them [here](scan_config.json)
 
 ## Ideas for next steps
 
