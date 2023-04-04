@@ -2,7 +2,7 @@
 
 <img src="./static/cat_in_space.png" alt="cat in space" width="200"/>
 
-This tool (GWoSS) identifies vulnerability in GitHub Workflows, like a SAST. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
+This tool (GWoSS) identifies vulnerabilities in GitHub Workflows, like a workflow SAST if you wanna go fancy. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
 
 ## Features
 
