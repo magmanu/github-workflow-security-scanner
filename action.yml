@@ -1,0 +1,55 @@
+name: 'SAST for GitHub Actions'
+description: 'A GitHub Action that performs static analysis on your workflows'
+inputs:
+  REPO_TOKEN:
+    description: 'Github token'
+    required: true
+  SHOULD_BREAK:
+    description: 'Boolean to determine if CI should break when a vulnerability is found'
+    required: false
+    default: false
+  REPOSITORY:
+    description: 'Repository with owner name where action should run'
+    required: true
+  
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - uses: actions/checkout@v3
+      with:
+        repository: 'magmanu/gh-workflow-auditor'
+    
+    - name: Install Dependencies
+      run: |
+        pwd
+        pip install -r requirements.txt
+        pip install python-dotenv
+      shell: bash
+
+    - name: Run scan
+      run: | 
+          export COUNT=$(python main.py)
+          echo "VULN_COUNT=$COUNT" >> $GITHUB_ENV
+      env:
+        TARGET_TYPE: "repo"
+        TARGET_INPUT: ${{ env.REPOSITORY }}
+        TOKEN: ${{ inputs.REPO_TOKEN }}
+      shell: bash
+    
+    - name: Terminate if vuln > 0
+      env: 
+        SHOULD_BREAK: ${{ fromJSON(inputs.SHOULD_BREAK) }}
+        VULN_COUNT: ${{ env.VULN_COUNT }}
+      run: |
+        if ([ $VULN_COUNT -gt 0 ] && [ $SHOULD_BREAK = true ])
+        then
+          exit 1
+        else
+          exit 0
+        fi
+      shell: bash
