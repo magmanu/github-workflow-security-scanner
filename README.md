@@ -1,46 +1,51 @@
-# Github Workflow Security
+# GWoSS: Github Workflow Security Scanner
 
 <img src="./static/cat_in_space.png" alt="cat in space" width="200"/>
 
-This tool identifies vulnerability in GitHub Workflows, like a SAST. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
+This tool (GWoSS) identifies vulnerabilities in GitHub Workflows, like a workflow SAST if you wanna go fancy. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
+
+## Features
+
+- **Security Scanning**: Checks all workflows in a specific branch (e.g., current branch)
+- **CI**: Option to break the pipeline if workflow is vulnerable
+- **Reporting**: Shows vulnerability report and suggested remediation on pipeline log
 
 ## Usage
 
-Example of workflow that uses this action
+Example of workflow that uses this action.  
+Optional: Set `SHOULD_BREAK` to `true` if you'd like the pipeline to fail if a workflow vulnerability is found. Default is false.
 
 ```yml
-name: Scan Github Worflows
+name: Security Scan for Github Worflows
 on: push
 
 jobs:
   scan-workflows:
     runs-on: ubuntu-latest
-    name: Scan workflows
 
     steps:
-        - uses: magmanu/github_workflow_security@migration
+        - uses: magmanu/github-workflow-security-scanner@v0.0.1 
           with:
             REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SHOULD_BREAK: true
           env:
             REPOSITORY: ${{  github.repository }}
+            BRANCH: ${{ github.ref_name}}
 
 ```
-
-## To do
-
-- [ ] Feat: Allow scanner to run on current branch (rather than in `main` only)
-- [ ] Feat: Enable org/user scan
-- [ ] Feat: Add `result.md` to PR comment
-- [ ] Feat: Add summary to workflow
-- [ ] Feat: Add supply chain to `result.md` table and vulnerability count
-- [ ] Chore: Improve how `result.md` is created
-- [ ] Chore: Add testing
 
 
 ## What checks are currently in place?
 
 See them [here](scan_config.json)
+## To do: Wanna Collaborate?
+
+- [ ] [Feat] Enable org/user scan
+- [ ] [Feat] Add `result.md` to PR comment
+- [ ] [Feat] Add summary to workflow
+- [ ] [Feat] Add supply chain to `result.md` table and vulnerability count
+- [ ] [Chore] Improve how `result.md` is created
+- [ ] [Chore] Add testing
 
 ## Ideas for next steps
 

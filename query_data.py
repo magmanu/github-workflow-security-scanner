@@ -1,10 +1,11 @@
-def return_query(query_type,name,after=None):
+def return_query(query_type,name,branch_name,after=None):
     if query_type == 'repository':
         owner,name = name.split('/')
+        branch = branch_name
         return f"""query {{
                     repository(owner: "{owner}",name: "{name}") {{
                         nameWithOwner
-                        object(expression: "HEAD:.github/workflows/") {{
+                        object(expression: "{branch}:.github/workflows/") {{
                             ... on Tree {{
                                 entries {{
                                     name
@@ -27,7 +28,7 @@ def return_query(query_type,name,after=None):
             edges{{
                 node{{
                 nameWithOwner,
-                object(expression: "HEAD:.github/workflows/") {{
+                object(expression: "{branch}:.github/workflows/") {{
                     ... on Tree {{
                     entries {{
                         name

@@ -1,4 +1,4 @@
-name: 'SAST for GitHub Actions'
+name: 'GitHub Workflow Security Scanner'
 description: 'A GitHub Action that performs static analysis on your workflows'
 inputs:
   REPO_TOKEN:
@@ -10,7 +10,8 @@ inputs:
     default: false
   REPOSITORY:
     description: 'Repository with owner name where action should run'
-    required: true
+  BRANCH:
+    description: 'Branch to run the scan on.'
   
 runs:
   using: 'composite'
@@ -39,6 +40,7 @@ runs:
         TARGET_TYPE: "repo"
         TARGET_INPUT: ${{ env.REPOSITORY }}
         TOKEN: ${{ inputs.REPO_TOKEN }}
+        TARGET_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
     
     - name: Terminate if vuln > 0
