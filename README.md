@@ -29,6 +29,7 @@ jobs:
 
 ## To do
 
+- [ ] Allow scanner to run on current branch (rather than in `main` only)
 - [ ] Improve how `result.md` is created
 - [ ] Add `result.md` to PR comment
 - [ ] Add summary to workflow
