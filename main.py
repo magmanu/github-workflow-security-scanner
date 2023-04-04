@@ -44,12 +44,12 @@ def main():
     
     target_type = os.environ.get('TARGET_TYPE',None) #repo, org, or user
     target_input = os.environ.get('REPOSITORY',None) #can be repo url, or a username for org/user
+    target_branch = os.environ.get('BRANCH',None)
 
     if target_type == 'repo':
-        repos = gh.get_single_repo(repo_name=target_input)
+        repos = gh.get_single_repo(repo_name=target_input, branch_name=target_branch)
     else:
-        count, repos = gh.get_multiple_repos(target_name=target_input,
-                                    target_type=target_type)
+        count, repos = gh.get_multiple_repos(target_name=target_input,branch_name=target_branch,target_type=target_type)
         AuditLogger.info(f"Metric: Scanning total {count} repos")
     
     for repo_dict in repos:

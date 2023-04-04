@@ -60,10 +60,9 @@ class GHWrapper():
                     repo_workflows.append({'name':workflow_name,'content':workflow_text})
         return repo_workflows
     
-    def get_single_repo(self, repo_name):
+    def get_single_repo(self, repo_name, branch_name):
         repos_all = {}
-        repo_query = return_query('repository',
-                                repo_name)
+        repo_query = return_query('repository',repo_name, branch_name)
         repos = self.call_graphql(repo_query)
         if repos.get('errors') is None:
             repo_node  = repos['data']['repository']
@@ -75,7 +74,7 @@ class GHWrapper():
                 AuditLogger.warning(f"* Repo {repo_name} has no workflow.  ")
         return repos_all
 
-    def get_multiple_repos(self,target_name,target_type='org'):
+    def get_multiple_repos(self,target_name,branch_name,target_type='org'):
         AuditLogger.warning(f"## Getting repos for {target_name}")
         repos_all = {}
         query_type = {'org':'organization','user':'user','repo':'repository'}
@@ -84,8 +83,7 @@ class GHWrapper():
             has_more = True # for pagination loop
             count = 0
             while has_more:
-                query = return_query(query_type[target_type],
-                                target_name, next_cursor)
+                query = return_query(query_type[target_type], target_name, branch_name, next_cursor)
                 repos = self.call_graphql(query)
                 if repos.get('errors') is None:
                     for repo in repos['data'][query_type[target_type]]['repositories']['edges']:
