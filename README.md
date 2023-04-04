@@ -10,21 +10,21 @@ Example of workflow that uses this action.
 Optional: Set `SHOULD_BREAK` to `true` if you'd like the pipeline to fail if a workflow vulnerability is found. Default is false.
 
 ```yml
-name: Scan Github Worflows
+name: Security Scan for Github Worflows
 on: push
 
 jobs:
   scan-workflows:
     runs-on: ubuntu-latest
-    name: Scan workflows
 
     steps:
-        - uses: magmanu/github_workflow_security@migration
+        - uses: magmanu/github-workflow-scanner@02faf3b2719edc254da7ba60593e94f9c0d9d39d 
           with:
             REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SHOULD_BREAK: true
           env:
             REPOSITORY: ${{  github.repository }}
+            BRANCH: ${{ github.ref_name}}
 
 ```
 
