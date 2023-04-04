@@ -4,6 +4,7 @@ from lib.logger import AuditLogger
 vuln_analyzer = WorkflowVulnAudit()
 
 def risky_trigger_analysis(identified_triggers):
+    """Refactored to get_dangerous_triggers"""
     return_triggers = []
     for trigger in identified_triggers:
         risky_or_not = vuln_analyzer.risky_trigger(trigger_name=trigger)
