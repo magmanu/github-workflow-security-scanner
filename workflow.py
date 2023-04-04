@@ -64,10 +64,12 @@ class WorkflowVulnAudit():
         return found_matches
 
     def risky_trigger(self, trigger_name: str) -> bool:
+        """Refactored to is_trigger_dangerous"""
         return bool(trigger_name in self.triggers)
     
     # Find and return every secrets being used in this workflow. If there is a RCE we can pull these secrets.
     def get_secrets(self, full_yaml: str) -> list:
+        """Refactored to list_secrets_used"""
         found_matches = []
         if matches:= self.secrets.findall(full_yaml):
             for match in matches:
