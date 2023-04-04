@@ -10,7 +10,6 @@ inputs:
     default: false
   REPOSITORY:
     description: 'Repository with owner name where action should run'
-    default: ${{ env.REPOSITORY }}
   BRANCH:
     description: 'Branch to run the scan on. Default is the current branch'
     default: ${{ github.ref_name}}
