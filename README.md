@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        - uses: magmanu/github-workflow-scanner@v0.0.1 
+        - uses: magmanu/github-workflow-security-scanner@v0.0.1 
           with:
             REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SHOULD_BREAK: true
