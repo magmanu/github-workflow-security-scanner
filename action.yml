@@ -24,6 +24,7 @@ runs:
     - uses: actions/checkout@v3
       with:
         repository: 'magmanu/github-workflow-scanner'
+        ref: 'chore/refactor-auditor'
     
     - name: Install Dependencies
       run: |
