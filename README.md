@@ -1,12 +1,13 @@
-# Github Workflow Security
+# GWoSS: Github Workflow Security Scanner
 
 <img src="./static/cat_in_space.png" alt="cat in space" width="200"/>
 
-This tool identifies vulnerability in GitHub Workflows, like a SAST. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
+This tool (GWoSS) identifies vulnerability in GitHub Workflows, like a SAST. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
 
 ## Usage
 
-Example of workflow that uses this action
+Example of workflow that uses this action.  
+Optional: Set `SHOULD_BREAK` to `true` if you'd like the pipeline to fail if a workflow vulnerability is found. Default is false.
 
 ```yml
 name: Scan Github Worflows
@@ -27,15 +28,22 @@ jobs:
 
 ```
 
+## Features
+
+## v0.0.1
+- Scans all workflows in the branch that performs a `push`
+- Option to run scan on a specified `BRANCH` instead
+- Shows vulnerability report and suggested remediation on pipeline log
+- Option to break pipeline if workflow is vulnerable
+
 ## To do
 
-- [ ] Feat: Allow scanner to run on current branch (rather than in `main` only)
-- [ ] Feat: Enable org/user scan
-- [ ] Feat: Add `result.md` to PR comment
-- [ ] Feat: Add summary to workflow
-- [ ] Feat: Add supply chain to `result.md` table and vulnerability count
-- [ ] Chore: Improve how `result.md` is created
-- [ ] Chore: Add testing
+- [ ] [Feat] Enable org/user scan
+- [ ] [Feat] Add `result.md` to PR comment
+- [ ] [Feat] Add summary to workflow
+- [ ] [Feat] Add supply chain to `result.md` table and vulnerability count
+- [ ] [Chore] Improve how `result.md` is created
+- [ ] [Chore] Add testing
 
 
 ## What checks are currently in place?
