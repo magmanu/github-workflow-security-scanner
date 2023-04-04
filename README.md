@@ -29,11 +29,14 @@ jobs:
 
 ## To do
 
-- [ ] Allow scanner to run on current branch (rather than in `main` only)
-- [ ] Improve how `result.md` is created
-- [ ] Add `result.md` to PR comment
-- [ ] Add summary to workflow
-- [ ] Add supply chain to `result.md` table and vulnerability count
+- [ ] Feat: Allow scanner to run on current branch (rather than in `main` only)
+- [ ] Feat: Enable org/user scan
+- [ ] Feat: Add `result.md` to PR comment
+- [ ] Feat: Add summary to workflow
+- [ ] Feat: Add supply chain to `result.md` table and vulnerability count
+- [ ] Chore: Improve how `result.md` is created
+- [ ] Chore: Add testing
+
 
 ## What checks are currently in place?
 
