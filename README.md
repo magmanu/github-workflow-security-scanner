@@ -29,10 +29,10 @@ jobs:
 
 ## To do
 
-- [] Improve how `result.md` is created
-- [] Add `result.md` to PR comment
-- [] Add summary to workflow
-- [] Add supply chain to `result.md` table and vulnerability count
+- [ ] Improve how `result.md` is created
+- [ ] Add `result.md` to PR comment
+- [ ] Add summary to workflow
+- [ ] Add supply chain to `result.md` table and vulnerability count
 
 ## What checks are currently in place?
 
