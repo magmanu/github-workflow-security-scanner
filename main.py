@@ -1,12 +1,11 @@
 import os
-import sys
 
 # Local imports
-from auditor import content_analyzer
+
 from action_auditor import action_audit
 from github_wrapper import GHWrapper
 from lib.logger import AuditLogger
-from auditor_refactored.main import workflow_analyzer
+from auditor.main import workflow_analyzer
 
 """
 Input:
