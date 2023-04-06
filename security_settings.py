@@ -13,7 +13,7 @@ malicious_commits = {
 }
 
 # Secrets
-secrets_pattern = ("\\${{\\s*secrets\\.[A-Za-z-_0-9]*\\s*}}",)
+secrets_pattern = "\\${{\\s*secrets\\.[A-Za-z-_0-9]*\\s*}}"
 
 # Github Events
 dangerous_events = ["pull_request_target", "issues", "issue_comment"]

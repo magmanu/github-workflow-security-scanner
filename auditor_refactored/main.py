@@ -1,6 +1,8 @@
-from vulnerability_catcher import list_secrets_used, get_dangerous_triggers
+import pydash as _
+
+from auditor_refactored.vulnerability_catcher import list_secrets_used, get_dangerous_triggers
 from workflow_copy import WorkflowParser, WorkflowVulnAudit
-from build_recommendation import create_msg
+from auditor_refactored.build_recommendation import create_msg
 from lib.logger import AuditLogger
 
 vuln_analyzer = WorkflowVulnAudit()
@@ -8,7 +10,6 @@ vuln_analyzer = WorkflowVulnAudit()
 
 def workflow_analyzer(content):
     result = {
-        "isVulnerable": [],
         "issues": [],
         "secrets": [],
     }
@@ -26,7 +27,7 @@ def workflow_analyzer(content):
         if all_jobs:
             job_elements = get_job_elements_with_id(wrkfl, all_jobs)
             dangerous_triggers = get_dangerous_triggers(
-                identified_triggers=all_workflow_triggers
+                triggers=all_workflow_triggers
             )
 
             try:
@@ -38,6 +39,8 @@ def workflow_analyzer(content):
                 AuditLogger.error(
                     f">>> Error parsing workflow. Error is {str(workflow_err)}"
                 )
+    result["issues"] = _.flatten(result["issues"])
+    result["secrets"] = _.flatten(result["secrets"])
     return result
 
 
@@ -138,7 +141,7 @@ def get_job_elements_with_id(wrkfl, all_jobs):
         steps = get_steps(environs, all_jobs, job_name)
 
         for step_number, step in enumerate(steps):
-            actions, runner_command, step_environ = wrkfl.get_step_elements(step)
+            actions, runner_command, with_input, step_environ = wrkfl.get_step_elements(step)
             if actions:
                 all_actions.append({f"Job{code_line}.Step{step_number+1}": step})
             if runner_command:

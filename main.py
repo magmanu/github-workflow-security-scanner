@@ -6,7 +6,7 @@ from auditor import content_analyzer
 from action_auditor import action_audit
 from github_wrapper import GHWrapper
 from lib.logger import AuditLogger
-
+from auditor_refactored.main import workflow_analyzer
 
 """
 Input:
@@ -19,23 +19,17 @@ Summary:
     for any potential vulnerabilities. 
 """
 def repo_analysis(repo_workflow):
-    AuditLogger.warning(f"| Workflow | Issues | Recommendation |")
-    AuditLogger.warning(f"| --- | --- | --- |")
-    all_secrets = []
-    vuln_count = 0
+    result = {}
+
     for workflow in repo_workflow:
         workflow_name = workflow['name']
         workflow_content = workflow['content']
-        vuln_check = content_analyzer(content=workflow_content) # will print out security issues
-        all_secrets.append({"workflow": workflow_name, "secrets": vuln_check['secrets']})
+
+        vuln_check = workflow_analyzer(content=workflow_content)
+        result[workflow_name] = {"secrets": vuln_check['secrets'], "issues": vuln_check['issues']}
         
-        if True in vuln_check["isVulnerable"]:
-            vuln_count += len(vuln_check["isVulnerable"])
-            for vuln in vuln_check["issues"]:
-                AuditLogger.warning(f"| {workflow_name} |{vuln['issue']} | {vuln['remediation']} |  ")
-        else:
-            AuditLogger.warning(f"| {workflow_name} | No issues detected |  |  ")
-    return vuln_count
+    print(result)
+    return result
 
 def main():
 
@@ -44,7 +38,7 @@ def main():
     
     target_type = os.environ.get('TARGET_TYPE',None) #repo, org, or user
     target_input = os.environ.get('REPOSITORY',None) #can be repo url, or a username for org/user
-    target_branch = os.environ.get('BRANCH',None)
+    target_branch = (os.environ.get('BRANCH',None) or "HEAD")
 
     if target_type == 'repo':
         repos = gh.get_single_repo(repo_name=target_input, branch_name=target_branch)
@@ -56,8 +50,9 @@ def main():
         AuditLogger.warning(f"\n\n## Audit for {repo_dict}")
         repo_workflows = repos[repo_dict]
         analysis = repo_analysis(repo_workflows)
-        if analysis > 0:
-            vuln_count += analysis
+
+        for workflow in analysis:
+            vuln_count += len(analysis[workflow]["issues"])
 
     action_audit()
 
@@ -66,3 +61,4 @@ def main():
 
 
 main()
+
