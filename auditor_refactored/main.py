@@ -17,9 +17,10 @@ def workflow_analyzer(content):
     wrkfl = WorkflowParser(content)
 
     if is_workflow_valid:
-        result["secrets"].append(
+        # help understand impact of RCE
+        _.get(result, "secrets").append(
             list_secrets_used(content)
-        )  # help understand impact of RCE
+        )  
 
         all_workflow_triggers = wrkfl.get_event_triggers()
         all_jobs = wrkfl.get_jobs()
@@ -33,33 +34,32 @@ def workflow_analyzer(content):
             try:
                 rce = get_rce_vuln(job_elements)
                 pwn = check_pwn_requests(dangerous_triggers, job_elements)
-                result["issues"].append(rce)
-                result["issues"].append(pwn)
+                _.get(result, "issues").append(rce)
+                _.get(result, "issues").append(pwn)
             except Exception as workflow_err:
                 AuditLogger.error(
                     f">>> Error parsing workflow. Error is {str(workflow_err)}"
                 )
-    result["issues"] = _.flatten(result["issues"])
-    result["secrets"] = _.flatten(result["secrets"])
+    result["issues"] = _.flatten(_.get(result, "issues"))
+    result["secrets"] = _.flatten(_.get(result, "secrets"))
     return result
 
 
 def is_workflow_valid(wrkfl):
-    return wrkfl.safe_yml_file and not wrkfl.safe_yml_file.get("failed", None)
+    return wrkfl.safe_yml_file and not _.get(wrkfl.safe_yml_file, "failed")
 
 
-def check_pwn_requests(dangerous_triggers, job_elements):
+def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list:
     issues = []
     action_storage = open("actions.txt", "a+")
-    for action in job_elements["all_actions"]:
+    for action in _.get(job_elements, "all_actions"):
         for step_number, step_dict in action.items():
-            action_name = step_dict.get("uses", None)
+            action_name = _.get(step_dict, "uses")
             action_storage.write(f"{action_name}\n")
             if "actions/checkout" in action_name:
                 # check if specific branch is checked out
                 if step_dict.get("with", None):
-                    if step_dict["with"].get("ref", None):
-                        ref_value = step_dict["with"].get("ref")
+                    if ref_value:= _.get(step_dict, "with.ref"):
                         risky_commits = vuln_analyzer.risky_commit(referenced=ref_value)
                         if risky_commits:
                             if "pull_request_target" in dangerous_triggers:
@@ -113,7 +113,7 @@ def get_vulnerable_user_input(job_elements, matched_strings):
         environ_variable = (
             environ_variable.strip("${{").strip("}}").split(".")[1].strip()
         )
-        environ_var_value = job_elements["environs"].get(environ_variable, None)
+        environ_var_value = _.get(job_elements, "environs.environ_variable")
         if environ_var_value:
             dangerous_env = vuln_analyzer.get_unsafe_inputs(
                 command_string=environ_var_value
@@ -160,11 +160,11 @@ def get_job_elements_with_id(wrkfl, all_jobs):
 
 def get_steps(environs, all_jobs, job_name):
     job_content = all_jobs[job_name]
-    steps = job_content.get("steps", None)
+    steps = _.get(job_content, "steps")
     if not steps:
         steps = job_content
     try:
-        environs.update(job_content.get("env", {}))
+        environs.update(_.get(job_content, "env", {}))
     except:
         AuditLogger.error(">> Environ variable is malformed")
     return steps
