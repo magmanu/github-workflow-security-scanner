@@ -1,4 +1,12 @@
 # GWoSS: Github Workflow Security Scanner
+![version](https://img.shields.io/github/v/release/magmanu/github-workflow-security-scanner)
+<!-- ![workflow](https://img.shields.io/github/actions/workflow/status/magmanu/github_actions_auditor/pytest.yml) -->
+<!-- ![coverage](./docs/coverage.svg) -->
+![commit](https://img.shields.io/github/last-commit/magmanu/github-workflow-security-scanner)  
+[![sast](https://img.shields.io/badge/security-CodeQL-black.svg)](https://github.com/magmanu/github-workflow-security-scanner/actions/workflows/github-code-scanning/codeql)
+[![sca](https://img.shields.io/badge/sca-dependabot-blue.svg)](https://github.com/dependabot)
+[![style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<!-- [![maintenance](https://img.shields.io/maintenance/yes/2023)](https://github.com/magmanu/github_actions_auditor/commits/main) -->
 
 <img src="./static/cat_in_space.png" alt="cat in space" width="200"/>
 
@@ -49,6 +57,7 @@ See them [here](scan_config.json)
 
 ## Ideas for next steps
 
+* Check if actions use full sha or tag rather than branch name
 * Check for [GitHub Action evaluates curl's output](https://docs.boostsecurity.io/rules/cicd-gha-curl-eval.html)
 * Check for [workflow inputs](https://docs.boostsecurity.io/rules/cicd-gha-workflow-dispatch-inputs.html)
 * Check for [write-all](https://docs.boostsecurity.io/rules/cicd-gha-write-all-permissions.html)

@@ -1,7 +1,7 @@
-def return_query(query_type,name,branch_name,after=None):
+def return_query(query_type,name,branch,after=None):
     if query_type == 'repository':
         owner,name = name.split('/')
-        branch = branch_name
+
         return f"""query {{
                     repository(owner: "{owner}",name: "{name}") {{
                         nameWithOwner

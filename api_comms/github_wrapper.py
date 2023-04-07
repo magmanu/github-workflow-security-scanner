@@ -3,7 +3,7 @@ import sys
 import requests
 from lib.logger import AuditLogger
 
-from query_data import return_query, validation_query
+from api_comms.query_data import return_query, validation_query
 
 """
 Input:
@@ -60,7 +60,7 @@ class GHWrapper():
                     repo_workflows.append({'name':workflow_name,'content':workflow_text})
         return repo_workflows
     
-    def get_single_repo(self, repo_name, branch_name):
+    def get_single_repo(self, repo_name, branch_name) -> dict:
         repos_all = {}
         repo_query = return_query('repository',repo_name, branch_name)
         repos = self.call_graphql(repo_query)
