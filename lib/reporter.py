@@ -39,10 +39,11 @@ def build_commands(tail):
         commands.append(f"{command}")
     return commands
 
-def report(result:dict):
+def report(result:dict, vuln_count:int):
 
     tail = build_tail_commands(result)
 
+    write_to_file(f"### Vulnerabilities found: {vuln_count}")
     commands = build_commands(tail)
     for command in commands:
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
