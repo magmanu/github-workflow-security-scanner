@@ -2,16 +2,19 @@ import json
 import re
 import yaml
 
-class WorkflowParser():
+
+class WorkflowParser:
     def __init__(self, yaml_content: str):
         try:
-            self.safe_yml_file = yaml.safe_load(yaml_content) # We don't want a vulnerability ;)
+            self.safe_yml_file = yaml.safe_load(
+                yaml_content
+            )  # We don't want a vulnerability ;)
         except:
-            self.safe_yml_file= {'failed':True}
+            self.safe_yml_file = {"failed": True}
 
     def get_event_triggers(self) -> list:
         # Check what starts a workflow. Can be list or dict
-        if self.safe_yml_file.get(True,None):
+        if self.safe_yml_file.get(True, None):
             if isinstance(self.safe_yml_file[True], list):
                 return self.safe_yml_file[True]
             elif isinstance(self.safe_yml_file[True], dict):
@@ -20,40 +23,46 @@ class WorkflowParser():
                 return [self.safe_yml_file[True]]
 
     def get_jobs(self) -> dict:
-        return self.safe_yml_file.get('jobs',None)
+        return self.safe_yml_file.get("jobs", None)
 
     def get_jobs_count(self) -> int:
         # list how many jobs execute. Jobs run on their own individual runners.
-        return len(self.safe_yml_file['jobs'].keys())
+        return len(self.safe_yml_file["jobs"].keys())
 
     def get_steps_for_jobs(self, job_dict: dict) -> list:
         # return a list of steps in a given job dictionary
-        return job_dict.get('steps',None)
+        return job_dict.get("steps", None)
 
-    def get_step_elements(self, step:dict) -> tuple:
-        actions = step.get('uses',None)
-        run_command = step.get('run',None)
-        with_input = step.get('with',None)
-        step_environ = step.get('env', None) # you can define environment variables per step.
+    def get_step_elements(self, step: dict) -> tuple:
+        actions = step.get("uses", None)
+        run_command = step.get("run", None)
+        with_input = step.get("with", None)
+        step_environ = step.get(
+            "env", None
+        )  # you can define environment variables per step.
         return actions, run_command, with_input, step_environ
 
 
 # Analyze various aspects of workflows to identify if it is risky.
-class WorkflowVulnAudit():
+class WorkflowVulnAudit:
     def __init__(self):
         # get scan config regex ready
         self.unsafe_input = {}
         self.malicious_commits = {}
-        with open('scan_config.json','r') as scan_file:
+        with open("scan_config.json", "r") as scan_file:
             scan_config = json.loads(scan_file.read())
-            self.triggers = scan_config['triggers']
-            self.secrets = re.compile(scan_config['secrets'])
-        for risky_input in scan_config['rce_risks']['unsafe_inputs']:
-            self.unsafe_input[risky_input] = re.compile(scan_config['rce_risks']['unsafe_inputs'][risky_input])
-        for commit_to_watch in scan_config['rce_risks']['malicious_commits']:
-            self.malicious_commits[commit_to_watch] = re.compile(scan_config['rce_risks']['malicious_commits'][commit_to_watch])
-        self.vulnerable = {'vulnerable':True}
-    
+            self.triggers = scan_config["triggers"]
+            self.secrets = re.compile(scan_config["secrets"])
+        for risky_input in scan_config["rce_risks"]["unsafe_inputs"]:
+            self.unsafe_input[risky_input] = re.compile(
+                scan_config["rce_risks"]["unsafe_inputs"][risky_input]
+            )
+        for commit_to_watch in scan_config["rce_risks"]["malicious_commits"]:
+            self.malicious_commits[commit_to_watch] = re.compile(
+                scan_config["rce_risks"]["malicious_commits"][commit_to_watch]
+            )
+        self.vulnerable = {"vulnerable": True}
+
     def get_unsafe_inputs(self, command_string) -> list:
         found_matches = {}
         for regex in self.unsafe_input:

@@ -27,7 +27,7 @@ dangerous_events = ["pull_request_target", "issues", "issue_comment"]
 
 issue = {
     "pwn_requests": "The workflow is vulnerable to pwn requests. Vulnerable step:",
-    "rce_with_user_input":  "{STEP}: [Unsanitezed input](https://securitylab.github.com/research/github-actions-untrusted-input/) detected with {REGEX}. Potentially malicious input called through GitHub context: `{ENV_NAME}:{ENV_VALUE}`",
+    "rce_with_user_input": "{STEP}: [Unsanitezed input](https://securitylab.github.com/research/github-actions-untrusted-input/) detected with {REGEX}. Potentially malicious input called through GitHub context: `{ENV_NAME}:{ENV_VALUE}`",
     "rce_general": "{STEP}: RCE detected with {REGEX}. Usage of {MATCH} found.",
 }
 remediation = {

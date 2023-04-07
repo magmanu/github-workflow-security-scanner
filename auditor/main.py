@@ -1,6 +1,12 @@
 import pydash as _
 
-from auditor.checkers import get_secrets_names, get_dangerous_triggers, is_workflow_valid, check_rce_vuln, check_pwn_requests
+from auditor.checkers import (
+    get_secrets_names,
+    get_dangerous_triggers,
+    is_workflow_valid,
+    check_rce_vuln,
+    check_pwn_requests,
+)
 from workflow import WorkflowParser, WorkflowVulnAudit
 from lib.logger import AuditLogger
 
@@ -17,18 +23,14 @@ def workflow_analyzer(content: str) -> dict[str, list]:
 
     if is_workflow_valid(wrkfl):
         # help understand impact of RCE
-        _.get(result, "secrets").append(
-            get_secrets_names(content)
-        )  
+        _.get(result, "secrets").append(get_secrets_names(content))
 
         all_workflow_triggers = wrkfl.get_event_triggers()
         all_jobs = wrkfl.get_jobs()
 
         if all_jobs:
             job_elements = get_job_elements_with_id(wrkfl, all_jobs)
-            dangerous_triggers = get_dangerous_triggers(
-                triggers=all_workflow_triggers
-            )
+            dangerous_triggers = get_dangerous_triggers(triggers=all_workflow_triggers)
 
             try:
                 rce = check_rce_vuln(job_elements)
@@ -44,7 +46,9 @@ def workflow_analyzer(content: str) -> dict[str, list]:
     return result
 
 
-def get_job_elements_with_id(wrkfl: WorkflowParser, all_jobs: dict) -> dict[str, list | dict]:
+def get_job_elements_with_id(
+    wrkfl: WorkflowParser, all_jobs: dict
+) -> dict[str, list | dict]:
     """
     Break down job elements (step, action, env and run command) and give them IDs.
     This helps the user identify where the vulnerability is.
@@ -58,7 +62,9 @@ def get_job_elements_with_id(wrkfl: WorkflowParser, all_jobs: dict) -> dict[str,
         steps = get_steps(environs, all_jobs, job_name)
 
         for step_number, step in enumerate(steps):
-            actions, runner_command, with_input, step_environ = wrkfl.get_step_elements(step)
+            actions, runner_command, with_input, step_environ = wrkfl.get_step_elements(
+                step
+            )
             if actions:
                 all_actions.append({f"Job{code_line}.Step{step_number+1}": step})
             if runner_command:
@@ -87,7 +93,9 @@ def get_steps(environs: dict, all_jobs: dict, job_name: str) -> list:
     return steps
 
 
-def create_msg(step_number:int, type:str ="", match:str="", input:dict ={}, regex:str="") -> dict[str, str]:
+def create_msg(
+    step_number: int, type: str = "", match: str = "", input: dict = {}, regex: str = ""
+) -> dict[str, str]:
     if type == "pwn":
         issue = f"The workflow is vulnerable to pwn requests. Vulnerable step: {step_number}"
         remediation = "Do not checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)"

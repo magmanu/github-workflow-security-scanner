@@ -4,9 +4,9 @@ import pydash as _
 def build_table_body(result: dict) -> list[dict]:
     strings = []
     for wrkfl_name in result:
-        secrets = (",".join(_.get(result[wrkfl_name], "secrets", None)))
+        secrets = ",".join(_.get(result[wrkfl_name], "secrets", None))
 
-        issues_list = _.get(result[wrkfl_name],"issues")
+        issues_list = _.get(result[wrkfl_name], "issues")
         if issues_list:
             for issue in issues_list:
                 desc = _.get(issue, "issue")
@@ -19,11 +19,11 @@ def build_table_body(result: dict) -> list[dict]:
     return strings
 
 
-def report(result:dict, vuln_count:int):
+def report(result: dict, vuln_count: int):
     summary_subheader = f"### Vulnerabilities found in this branch: {vuln_count}"
     header = [
         "| Workflow | Secrets | Issues | Recommendation |",
-        "| --- | --- | --- | --- |"
+        "| --- | --- | --- | --- |",
     ]
     table = build_table_body(result)
 

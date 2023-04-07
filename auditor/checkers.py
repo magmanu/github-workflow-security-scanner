@@ -1,10 +1,16 @@
 import re
 import pydash as _
 
-from auditor.security_settings import secrets_pattern, dangerous_events, remediation, issue
+from auditor.security_settings import (
+    secrets_pattern,
+    dangerous_events,
+    remediation,
+    issue,
+)
 from workflow import WorkflowVulnAudit, WorkflowParser
 
 vuln_analyzer = WorkflowVulnAudit()
+
 
 def is_trigger_dangerous(trigger_name: str) -> bool:
     return trigger_name in dangerous_events
@@ -36,8 +42,8 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list[dic
             action_storage.write(f"{action_name}\n")
             if "actions/checkout" in action_name:
                 # check if specific branch is checked out
-                if _.get(step_dict,"with"):
-                    if ref_value:= _.get(step_dict, "with.ref"):
+                if _.get(step_dict, "with"):
+                    if ref_value := _.get(step_dict, "with.ref"):
                         risky_commits = vuln_analyzer.risky_commit(referenced=ref_value)
                         if risky_commits:
                             if "pull_request_target" in dangerous_triggers:
@@ -80,7 +86,9 @@ def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
     return issues_per_workflow
 
 
-def get_env_kv_provided_by_user(job_elements: dict, matched_strings) -> list[dict[str, str]]:
+def get_env_kv_provided_by_user(
+    job_elements: dict, matched_strings
+) -> list[dict[str, str]]:
     """
     Retrieve all enviroment variables that contain exploitable input
     (as opposed to by the environment)
@@ -101,7 +109,6 @@ def get_env_kv_provided_by_user(job_elements: dict, matched_strings) -> list[dic
     return exploitable_input
 
 
-
 def get_dangerous_triggers(triggers: list) -> list:
     dangeours_triggers = []
     for trigger in triggers:
@@ -118,23 +125,37 @@ def get_secrets_names(full_yaml: str) -> list:
     :return: A list of all secrets being used in this workflow."""
     found_matches = []
     secrets = re.compile(secrets_pattern)
-    if matches:= secrets.findall(full_yaml):
+    if matches := secrets.findall(full_yaml):
         for match in matches:
             if match not in found_matches:
                 found_matches.append(match)
     return found_matches
 
 
-def create_msg(step_number: int, type="", match="", input={}, regex="") -> dict[str, str]:
+def create_msg(
+    step_number: int, type="", match="", input={}, regex=""
+) -> dict[str, str]:
     if type == "pwn":
         problem = f"{_.get(issue, 'pwn_requests')} {step_number}"
         solution = _.get(remediation, "pwn_requests")
     if input == {} and type == "rce":
-        problem = f"{_.get(issue, 'rce_general')}".replace("{REGEX}", regex).replace("{STEP}", step_number).replace("{MATCH}", match[0])
+        problem = (
+            f"{_.get(issue, 'rce_general')}".replace("{REGEX}", regex)
+            .replace("{STEP}", step_number)
+            .replace("{MATCH}", match[0])
+        )
         solution = _.get(remediation, "rce_general").replace("{MATCH}", match[0])
     if type == "rce":
         for env_name in input:
-            problem = _.get(issue, "rce_with_user_input").replace("{REGEX}", regex).replace("{STEP}", step_number).replace("{ENV_NAME}", input).replace("{ENV_VALUE}", input[env_name])
-            solution = _.get(remediation, "rce_with_user_input").replace("{MATCH}", f"{','.join(match)}")
+            problem = (
+                _.get(issue, "rce_with_user_input")
+                .replace("{REGEX}", regex)
+                .replace("{STEP}", step_number)
+                .replace("{ENV_NAME}", input)
+                .replace("{ENV_VALUE}", input[env_name])
+            )
+            solution = _.get(remediation, "rce_with_user_input").replace(
+                "{MATCH}", f"{','.join(match)}"
+            )
 
     return {"issue": problem, "remediation": solution}
