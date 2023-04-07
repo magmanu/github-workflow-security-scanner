@@ -1,5 +1,7 @@
 # GWoSS: Github Workflow Security Scanner
 
+<img src="./static/cat_machine.jpeg" alt="cat in space" width="30%" align="right"/>
+
 ![version](https://img.shields.io/github/v/release/magmanu/github-workflow-security-scanner)
 ![commit](https://img.shields.io/github/last-commit/magmanu/github-workflow-security-scanner)
 [![sast](https://img.shields.io/badge/SAST-CodeQL-black.svg)](https://github.com/magmanu/github-workflow-security-scanner/actions/workflows/github-code-scanning/codeql)
@@ -8,8 +10,6 @@
 <!-- ![workflow](https://img.shields.io/github/actions/workflow/status/magmanu/github_actions_auditor/pytest.yml) -->
 <!-- ![coverage](./docs/coverage.svg) -->
 <!-- [![maintenance](https://img.shields.io/maintenance/yes/2023)](https://github.com/magmanu/github_actions_auditor/commits/main) -->
-
-<img src="./static/cat_machine.jpeg" alt="cat in space" width="30%" align="right"/>
 
 **GWoSS** scans your GitHub Workflows for vulnerabilities, like a workflow SAST if you wanna go fancy. It looks for anti-patterns such as ingesting inputs in an unsafe manner or malicious commits in build process.
 
