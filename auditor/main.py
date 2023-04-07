@@ -1,5 +1,4 @@
 import pydash as _
-import re
 
 from auditor.checkers import get_secrets_names, get_dangerous_triggers, is_workflow_valid, check_rce_vuln, check_pwn_requests
 from workflow_copy import WorkflowParser, WorkflowVulnAudit
@@ -8,7 +7,7 @@ from lib.logger import AuditLogger
 vuln_analyzer = WorkflowVulnAudit()
 
 
-def workflow_analyzer(content):
+def workflow_analyzer(content: str) -> dict[str, list]:
     result = {
         "issues": [],
         "secrets": [],
@@ -16,7 +15,7 @@ def workflow_analyzer(content):
 
     wrkfl = WorkflowParser(content)
 
-    if is_workflow_valid:
+    if is_workflow_valid(wrkfl):
         # help understand impact of RCE
         _.get(result, "secrets").append(
             get_secrets_names(content)
@@ -45,7 +44,7 @@ def workflow_analyzer(content):
     return result
 
 
-def get_job_elements_with_id(wrkfl, all_jobs):
+def get_job_elements_with_id(wrkfl: WorkflowParser, all_jobs: dict) -> dict[str, list | dict]:
     """
     Break down job elements (step, action, env and run command) and give them IDs.
     This helps the user identify where the vulnerability is.
@@ -76,7 +75,7 @@ def get_job_elements_with_id(wrkfl, all_jobs):
     }
 
 
-def get_steps(environs, all_jobs, job_name):
+def get_steps(environs: dict, all_jobs: dict, job_name: str) -> list:
     job_content = all_jobs[job_name]
     steps = _.get(job_content, "steps")
     if not steps:
@@ -88,7 +87,7 @@ def get_steps(environs, all_jobs, job_name):
     return steps
 
 
-def create_msg(step_number, type="", match="", input={}, regex=""):
+def create_msg(step_number:int, type:str ="", match:str="", input:dict ={}, regex:str="") -> dict[str, str]:
     if type == "pwn":
         issue = f"The workflow is vulnerable to pwn requests. Vulnerable step: {step_number}"
         remediation = "Do not checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)"

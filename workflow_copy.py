@@ -63,7 +63,7 @@ class WorkflowVulnAudit:
             )
         self.vulnerable = {"vulnerable": True}
 
-    def get_unsafe_inputs(self, command_string) -> list:
+    def get_unsafe_inputs(self, command_string) -> dict:
         found_matches = {}
         for regex in self.unsafe_input:
             if matches := self.unsafe_input[regex].finditer(command_string):

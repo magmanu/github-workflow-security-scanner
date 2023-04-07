@@ -1,8 +1,8 @@
 import re
 import pydash as _
 
-from security_settings import secrets_pattern, dangerous_events
-from workflow_copy import WorkflowVulnAudit
+from security_settings import secrets_pattern, dangerous_events, remediation, issue
+from workflow_copy import WorkflowVulnAudit, WorkflowParser
 
 vuln_analyzer = WorkflowVulnAudit()
 
@@ -10,15 +10,24 @@ def is_trigger_dangerous(trigger_name: str) -> bool:
     return trigger_name in dangerous_events
 
 
-def is_workflow_valid(wrkfl):
+def is_workflow_valid(wrkfl: WorkflowParser) -> bool:
     return wrkfl.safe_yml_file and not _.get(wrkfl.safe_yml_file, "failed")
 
 
-def is_environment_dangerous(dangerous_env):
+def is_environment_dangerous(dangerous_env: dict) -> bool:
     return dangerous_env and list(dangerous_env.keys())[0] != "environ_regex"
 
 
-def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list:
+def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list[dict]:
+    """
+    What is a pwn request?
+    When a Github Workflow
+    - Triggers on the pull_request_target event type; and
+    - Performs an explicit checkout of the Pull Request branch (i.e. checks out the content being submitted for inclusion in the target repo); and
+    - Uses the state of the checked out branch in an unsafe manner (e.g. by building the repo using make or by installing packages using a package manager)
+    Such workflow can be abused to steal or use a GITHUB_TOKEN value that belongs to the target repo.
+    See an interesting disclosure story here: https://github.com/justinsteven/advisories/blob/main/2021_github_actions_checkspelling_token_leak_via_advice_symlink.md
+    """
     issues = []
     action_storage = open("actions.txt", "a+")
     for action in _.get(job_elements, "all_actions"):
@@ -27,7 +36,7 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list:
             action_storage.write(f"{action_name}\n")
             if "actions/checkout" in action_name:
                 # check if specific branch is checked out
-                if step_dict.get("with", None):
+                if _.get(step_dict,"with"):
                     if ref_value:= _.get(step_dict, "with.ref"):
                         risky_commits = vuln_analyzer.risky_commit(referenced=ref_value)
                         if risky_commits:
@@ -38,7 +47,7 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list:
     return issues
 
 
-def check_rce_vuln(job_elements):
+def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
     issues_per_workflow = []
 
     for runner_command in job_elements["runner_commands"]:
@@ -49,17 +58,17 @@ def check_rce_vuln(job_elements):
 
             if dangerous_inputs:
                 for regex, matched_strings in dangerous_inputs.items():
-                    # check if environment variable contains values provided by the user
+                    # check if environment variable contains exploitable input
                     if regex == "environ_regex":
-                        if vulnerable_user_input := get_env_kv_provided_by_user(
+                        if exploitable_input := get_env_kv_provided_by_user(
                             job_elements, matched_strings
                         ):
-                            for user_input in vulnerable_user_input:
+                            for input in exploitable_input:
                                 rce = create_msg(
                                     step_number,
                                     type="rce",
                                     match=matched_strings,
-                                    input=user_input,
+                                    input=input,
                                     regex=regex,
                                 )
                                 issues_per_workflow.append(rce)
@@ -71,13 +80,13 @@ def check_rce_vuln(job_elements):
     return issues_per_workflow
 
 
-def get_env_kv_provided_by_user(job_elements, matched_strings):
+def get_env_kv_provided_by_user(job_elements: dict, matched_strings) -> list[dict[str, str]]:
     """
-    Retrieve all enviroment variables that contain values provided by the user
+    Retrieve all enviroment variables that contain exploitable input
     (as opposed to by the environment)
     """
 
-    vulnerable_user_input = []
+    exploitable_input = []
     for environ_variable in matched_strings:
         environ_variable = (
             environ_variable.strip("${{").strip("}}").split(".")[1].strip()
@@ -88,8 +97,8 @@ def get_env_kv_provided_by_user(job_elements, matched_strings):
                 command_string=environ_var_value
             )
             if is_environment_dangerous(dangerous_env):
-                vulnerable_user_input.append({environ_variable: environ_var_value})
-    return vulnerable_user_input
+                exploitable_input.append({environ_variable: environ_var_value})
+    return exploitable_input
 
 
 
@@ -116,18 +125,16 @@ def get_secrets_names(full_yaml: str) -> list:
     return found_matches
 
 
-def create_msg(step_number, type="", match="", input={}, regex=""):
+def create_msg(step_number: int, type="", match="", input={}, regex="") -> dict[str, str]:
     if type == "pwn":
-        issue = f"The workflow is vulnerable to pwn requests. Vulnerable step: {step_number}"
-        remediation = "Do not checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)"
+        problem = f"{_.get(issue, 'pwn_requests')} {step_number}"
+        solution = _.get(remediation, "pwn_requests")
     if input == {} and type == "rce":
-        issue = f"RCE detected with {regex} in {step_number}"
-        remediation = f" Please sanitise {','.join(match)} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable)"
+        problem = f"{_.get(issue, 'rce_general')}".replace("{REGEX}", regex).replace("{STEP}", step_number).replace("{MATCH}", match[0])
+        solution = _.get(remediation, "rce_general").replace("{MATCH}", match[0])
     if type == "rce":
         for env_name in input:
-            issue = (
-                f"RCE detected with {regex} in {step_number}. ENV variable {env_name} is called through GitHub context and takes user input {input[env_name]}",
-            )
-            remediation = f" Please sanitise {','.join(match)} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable)"
+            problem = _.get(issue, "rce_with_user_input").replace("{REGEX}", regex).replace("{STEP}", step_number).replace("{ENV_NAME}", input).replace("{ENV_VALUE}", input[env_name])
+            solution = _.get(remediation, "rce_with_user_input").replace("{MATCH}", f"{','.join(match)}")
 
-    return {"issue": issue, "remediation": remediation}
+    return {"issue": problem, "remediation": solution}

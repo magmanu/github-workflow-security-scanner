@@ -1,7 +1,7 @@
 {
     "rce_risks":{
         "unsafe_inputs":{
-            "user_input_body_title":"\\${{\\s*github.event.(.*).(body|title)\\s*}}",
+            "exploitable_input":"\\${{\\s*github.event.(.*).(body|title)\\s*}}",
             "malicious_commit_message":"\\${{\\s*(.*).head_commit.message\\s*}}",
             "malicious_input":"\\${{\\s*(.*)github.event.review(.*)\\s*}}",
             "environ_regex":"\\${{\\s*env.[A-Za-z0-9_-]*\\s*}}",
