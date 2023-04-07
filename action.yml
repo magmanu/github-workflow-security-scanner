@@ -36,6 +36,8 @@ runs:
       run: | 
           export COUNT=$(python main.py)
           echo "VULN_COUNT=$COUNT" >> $GITHUB_ENV
+          filename='result.md'
+          while read line; do echo "$line" >> $GITHUB_STEP_SUMMARY; done < $filename
       env:
         TARGET_TYPE: "repo"
         TARGET_INPUT: ${{ env.REPOSITORY }}
