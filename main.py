@@ -2,8 +2,8 @@ import os
 
 # Local imports
 
-from action_auditor import action_audit
-from github_wrapper import GHWrapper
+from auditor.action_auditor import action_audit
+from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
 from auditor.main import workflow_analyzer
 
@@ -26,8 +26,7 @@ def repo_analysis(repo_workflow):
 
         vuln_check = workflow_analyzer(content=workflow_content)
         result[workflow_name] = {"secrets": vuln_check['secrets'], "issues": vuln_check['issues']}
-        
-    print(result)
+
     return result
 
 def main():

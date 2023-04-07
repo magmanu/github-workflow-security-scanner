@@ -1,7 +1,7 @@
 import pydash as _
 
 from auditor.checkers import get_secrets_names, get_dangerous_triggers, is_workflow_valid, check_rce_vuln, check_pwn_requests
-from workflow_copy import WorkflowParser, WorkflowVulnAudit
+from auditor.workflow_copy import WorkflowParser, WorkflowVulnAudit
 from lib.logger import AuditLogger
 
 vuln_analyzer = WorkflowVulnAudit()

@@ -1,8 +1,8 @@
 import re
 import pydash as _
 
-from security_settings import secrets_pattern, dangerous_events, remediation, issue
-from workflow_copy import WorkflowVulnAudit, WorkflowParser
+from auditor.security_settings import secrets_pattern, dangerous_events, remediation, issue
+from auditor.workflow_copy import WorkflowVulnAudit, WorkflowParser
 
 vuln_analyzer = WorkflowVulnAudit()
 

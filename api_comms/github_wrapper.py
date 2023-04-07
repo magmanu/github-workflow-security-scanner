@@ -3,7 +3,7 @@ import sys
 import requests
 from lib.logger import AuditLogger
 
-from query_data import return_query, validation_query
+from api_comms.query_data import return_query, validation_query
 
 """
 Input:

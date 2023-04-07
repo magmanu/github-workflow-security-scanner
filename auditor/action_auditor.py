@@ -1,4 +1,4 @@
-from github_wrapper import GHWrapper
+from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
 from pathlib import Path
 import re

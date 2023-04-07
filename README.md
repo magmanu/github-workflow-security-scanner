@@ -49,6 +49,7 @@ See them [here](scan_config.json)
 
 ## Ideas for next steps
 
+* Check if actions use full sha or tag rather than branch name
 * Check for [GitHub Action evaluates curl's output](https://docs.boostsecurity.io/rules/cicd-gha-curl-eval.html)
 * Check for [workflow inputs](https://docs.boostsecurity.io/rules/cicd-gha-workflow-dispatch-inputs.html)
 * Check for [write-all](https://docs.boostsecurity.io/rules/cicd-gha-write-all-permissions.html)
