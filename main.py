@@ -57,6 +57,8 @@ def main():
 
     report(analysis, vuln_count)
 
+    # Print to define if workflow step should fail
+    print(vuln_count)
 
 main()
 

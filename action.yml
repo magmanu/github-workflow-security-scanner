@@ -46,12 +46,6 @@ runs:
         TARGET_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
 
-    - name: Write to workflow job summary
-      run: |
-        SUMMARY=$'# Testing Job Summary\n## Second Level Heading\nHello GitHub'
-        echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
-      shell: bash
-
     - name: Terminate if vuln > 0
       env: 
         SHOULD_BREAK: ${{ fromJSON(inputs.SHOULD_BREAK) }}
