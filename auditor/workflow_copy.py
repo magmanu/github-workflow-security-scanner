@@ -51,7 +51,7 @@ class WorkflowVulnAudit:
         self.malicious_commits = {}
         with open("scan_config.json", "r") as scan_file:
             scan_config = json.loads(scan_file.read())
-            self.triggers = scan_config["risky_events"]
+            self.triggers = scan_config["triggers"]
             self.secrets = re.compile(scan_config["secrets"])
         for risky_input in scan_config["rce_risks"]["unsafe_inputs"]:
             self.unsafe_input[risky_input] = re.compile(

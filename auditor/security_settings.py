@@ -27,11 +27,11 @@ dangerous_events = ["pull_request_target", "issues", "issue_comment"]
 
 issue = {
     "pwn_requests": "The workflow is vulnerable to pwn requests. Vulnerable step:",
-    "rce_with_user_input":  "[Unsanitezed input](https://securitylab.github.com/research/github-actions-untrusted-input/) detected with {REGEX} in {STEP}. The env variable {ENV_NAME} is called through GitHub context and takes input that could be malicious: {ENV_VALUE}",
-    "rce_general": "RCE detected with {REGEX} in {STEP}: Usage of {MATCH} found.",
+    "rce_with_user_input":  "{STEP}: [Unsanitezed input](https://securitylab.github.com/research/github-actions-untrusted-input/) detected with {REGEX}. Potentially malicious input called through GitHub context: `{ENV_NAME}:{ENV_VALUE}`",
+    "rce_general": "{STEP}: RCE detected with {REGEX}. Usage of {MATCH} found.",
 }
 remediation = {
-    "pwn_requests": "Do not checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)",
-    "rce_with_user_input": "Please sanitise {MATCH} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or an action with arguments",
-    "rce_general": "Please sanitise {MATCH} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or an action with arguments",
+    "pwn_requests": "Do NOT checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)",
+    "rce_with_user_input": "Sanitise `{MATCH}` with an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or use an action with arguments",
+    "rce_general": "Sanitise `{MATCH}` with an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or use an action with arguments",
 }
