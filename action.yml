@@ -36,13 +36,15 @@ runs:
       run: | 
           export COUNT=$(python main.py)
           echo "VULN_COUNT=$COUNT" >> $GITHUB_ENV
+          filename='result.md'
+          while read line; do echo "$line" >> $GITHUB_STEP_SUMMARY; done < $filename
       env:
         TARGET_TYPE: "repo"
         TARGET_INPUT: ${{ env.REPOSITORY }}
         TOKEN: ${{ inputs.REPO_TOKEN }}
         TARGET_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
-    
+
     - name: Terminate if vuln > 0
       env: 
         SHOULD_BREAK: ${{ fromJSON(inputs.SHOULD_BREAK) }}
@@ -55,3 +57,4 @@ runs:
           exit 0
         fi
       shell: bash
+
