@@ -1,27 +1,34 @@
 # GWoSS: Github Workflow Security Scanner
+
 ![version](https://img.shields.io/github/v/release/magmanu/github-workflow-security-scanner)
-<!-- ![workflow](https://img.shields.io/github/actions/workflow/status/magmanu/github_actions_auditor/pytest.yml) -->
-<!-- ![coverage](./docs/coverage.svg) -->
-![commit](https://img.shields.io/github/last-commit/magmanu/github-workflow-security-scanner)  
-[![sast](https://img.shields.io/badge/security-CodeQL-black.svg)](https://github.com/magmanu/github-workflow-security-scanner/actions/workflows/github-code-scanning/codeql)
+![commit](https://img.shields.io/github/last-commit/magmanu/github-workflow-security-scanner)
+[![sast](https://img.shields.io/badge/SAST-CodeQL-black.svg)](https://github.com/magmanu/github-workflow-security-scanner/actions/workflows/github-code-scanning/codeql)
 [![sca](https://img.shields.io/badge/sca-dependabot-blue.svg)](https://github.com/dependabot)
 [![style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<!-- ![workflow](https://img.shields.io/github/actions/workflow/status/magmanu/github_actions_auditor/pytest.yml) -->
+<!-- ![coverage](./docs/coverage.svg) -->
 <!-- [![maintenance](https://img.shields.io/maintenance/yes/2023)](https://github.com/magmanu/github_actions_auditor/commits/main) -->
 
-<img src="./static/cat_in_space.png" alt="cat in space" width="200"/>
+<img src="./static/cat_machine.jpeg" alt="cat in space" width="30%" align="right"/>
 
-This tool (GWoSS) identifies vulnerabilities in GitHub Workflows, like a workflow SAST if you wanna go fancy. It does so by scanning the workflow files for anti-patterns such as ingesting user inputs in an unsafe manner or using malicious commits in build process.
+**GWoSS** scans your GitHub Workflows for vulnerabilities, like a workflow SAST if you wanna go fancy. It looks for anti-patterns such as ingesting inputs in an unsafe manner or malicious commits in build process.
+
+<br clear="right"/>
 
 ## Features
 
-- **Security Scanning**: Checks all workflows in a specific branch (e.g., current branch)
-- **CI**: Option to break the pipeline if workflow is vulnerable
-- **Reporting**: Shows vulnerability report and suggested remediation on pipeline log
+<img src="./static/summary_view.png" alt="cat in space" width="30%" align="left"/>
+
+- **Security Scanning**: Checks all workflows in a specific branch (default: current branch)
+- **CI**: Option to break the test if any workflow is vulnerable
+- **Reporting**: Shows vulnerability report summary and suggest remediation
+
+<br clear="left"/>
 
 ## Usage
 
 Example of workflow that uses this action.  
-Optional: Set `SHOULD_BREAK` to `true` if you'd like the pipeline to fail if a workflow vulnerability is found. Default is false.
+*Optional*: Set `SHOULD_BREAK` to `true` if you'd like the tests to fail if a workflow vulnerability is found. Default is false.
 
 ```yml
 name: Security Scan for Github Worflows
@@ -32,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        - uses: magmanu/github-workflow-security-scanner@v0.0.1 
+        - uses: magmanu/github-workflow-security-scanner@v0.1.0
           with:
             REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SHOULD_BREAK: true
@@ -41,7 +48,9 @@ jobs:
             BRANCH: ${{ github.ref_name}}
 
 ```
+## Security
 
+GWoSS uses GitHub's GraphQL endoint, so for the time being, it requires a classic token to run. Due to this, an API token is required. You can generate a basic PAT token with no read access for this.
 
 ## What checks are currently in place?
 
@@ -50,10 +59,9 @@ See them [here](scan_config.json)
 
 - [ ] [Feat] Enable org/user scan
 - [ ] [Feat] Add `result.md` to PR comment
-- [ ] [Feat] Add summary to workflow
 - [ ] [Feat] Add supply chain to `result.md` table and vulnerability count
-- [ ] [Chore] Improve how `result.md` is created
-- [ ] [Chore] Add testing
+- [ ] [Chore] Add tests
+
 
 ## Ideas for next steps
 
@@ -66,4 +74,3 @@ See them [here](scan_config.json)
 ## Notice
 
 This was originally forked from [this repo](https://github.com/TinderSec/gh-workflow-auditor) and converted to a GitHub Action. I explicitly affirm that changes were made to the original code and am in good faith reproducing the copyright. I believe this is enough to fullfill the original copyright requirements.  
-
