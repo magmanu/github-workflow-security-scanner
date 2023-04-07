@@ -55,3 +55,9 @@ runs:
           exit 0
         fi
       shell: bash
+    
+    - name: Write to workflow job summary
+      run: |
+        SUMMARY=$'# Testing Job Summary\n## Second Level Heading\nHello GitHub'
+        echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+      shell: bash
