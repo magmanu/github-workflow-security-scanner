@@ -5,6 +5,7 @@ import os
 from auditor.action_auditor import action_audit
 from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
+from lib.reporter import report
 from auditor.main import workflow_analyzer
 
 """
@@ -54,8 +55,7 @@ def main():
 
     action_audit()
 
-    AuditLogger.warning(f"## Vulnerabilities found: {vuln_count}")
-    print(vuln_count)
+    report(analysis, vuln_count)
 
 
 main()
