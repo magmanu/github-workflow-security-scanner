@@ -5,32 +5,32 @@ import yaml
 class WorkflowParser():
     def __init__(self, yaml_content: str):
         try:
-            self.parsed_content = yaml.safe_load(yaml_content) # We don't want a vulnerability ;)
+            self.safe_yml_file = yaml.safe_load(yaml_content) # We don't want a vulnerability ;)
         except:
-            self.parsed_content= {'failed':True}
+            self.safe_yml_file= {'failed':True}
 
     def get_event_triggers(self) -> list:
         # Check what starts a workflow. Can be list or dict
-        if self.parsed_content.get(True,None):
-            if isinstance(self.parsed_content[True], list):
-                return self.parsed_content[True]
-            elif isinstance(self.parsed_content[True], dict):
-                return list(self.parsed_content[True].keys())
+        if self.safe_yml_file.get(True,None):
+            if isinstance(self.safe_yml_file[True], list):
+                return self.safe_yml_file[True]
+            elif isinstance(self.safe_yml_file[True], dict):
+                return list(self.safe_yml_file[True].keys())
             else:
-                return [self.parsed_content[True]]
+                return [self.safe_yml_file[True]]
 
     def get_jobs(self) -> dict:
-        return self.parsed_content.get('jobs',None)
+        return self.safe_yml_file.get('jobs',None)
 
     def get_jobs_count(self) -> int:
         # list how many jobs execute. Jobs run on their own individual runners.
-        return len(self.parsed_content['jobs'].keys())
+        return len(self.safe_yml_file['jobs'].keys())
 
     def get_steps_for_jobs(self, job_dict: dict) -> list:
         # return a list of steps in a given job dictionary
         return job_dict.get('steps',None)
 
-    def analyze_step(self, step:dict) -> tuple:
+    def get_step_elements(self, step:dict) -> tuple:
         actions = step.get('uses',None)
         run_command = step.get('run',None)
         with_input = step.get('with',None)
