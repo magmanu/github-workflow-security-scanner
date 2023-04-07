@@ -1,11 +1,8 @@
 import subprocess
 import pydash as _
 
-def add_command(string):
-    return f'echo "{string}" >> GITHUB_STEP_SUMMARY'
 
-
-def build_tail_commands(result: dict) -> list[dict]:
+def build_table_body(result: dict) -> list[dict]:
     strings = []
     for wrkfl_name in result:
         secrets = (",".join(_.get(result[wrkfl_name], "secrets", None)))
@@ -23,31 +20,18 @@ def build_tail_commands(result: dict) -> list[dict]:
     return strings
 
 
-def build_commands(tail):
-    commands = []
+def report(result:dict, vuln_count:int):
+    summary_subheader = f"### Vulnerabilities found in this branch: {vuln_count}"
     header = [
         "| Workflow | Secrets | Issues | Recommendation |",
         "| --- | --- | --- | --- |"
     ]
+    table = build_table_body(result)
 
-
+    write_to_file(summary_subheader)
     write_to_file(header)
+    write_to_file(table)
 
-    for string in tail:
-        write_to_file(string)
-        command = add_command(string)
-        commands.append(f"{command}")
-    return commands
-
-def report(result:dict, vuln_count:int):
-
-    tail = build_tail_commands(result)
-
-    write_to_file(f"### Vulnerabilities found: {vuln_count}")
-    commands = build_commands(tail)
-    for command in commands:
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
 
 def write_to_file(inputs: str | list):
     f = open("result.md", "a")
