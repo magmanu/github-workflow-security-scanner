@@ -54,7 +54,7 @@ class WorkflowVulnAudit():
             self.malicious_commits[commit_to_watch] = re.compile(scan_config['rce_risks']['malicious_commits'][commit_to_watch])
         self.vulnerable = {'vulnerable':True}
     
-    def risky_command(self, command_string) -> list:
+    def get_unsafe_inputs(self, command_string) -> list:
         found_matches = {}
         for regex in self.unsafe_input:
             if matches := self.unsafe_input[regex].finditer(command_string):
@@ -66,17 +66,7 @@ class WorkflowVulnAudit():
     def risky_trigger(self, trigger_name: str) -> bool:
         """Refactored to is_trigger_dangerous"""
         return bool(trigger_name in self.triggers)
-    
-    # Find and return every secrets being used in this workflow. If there is a RCE we can pull these secrets.
-    def get_secrets(self, full_yaml: str) -> list:
-        """Refactored to list_secrets_used"""
-        found_matches = []
-        if matches:= self.secrets.findall(full_yaml):
-            for match in matches:
-                if match not in found_matches:
-                    found_matches.append(match)
-        return found_matches
-    
+
     def risky_commit(self, referenced):
         found_matches = {}
         for regex in self.malicious_commits:
