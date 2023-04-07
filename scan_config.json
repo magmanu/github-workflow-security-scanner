@@ -13,5 +13,5 @@
         }
     },
     "secrets":"\\${{\\s*secrets\\.[A-Za-z-_0-9]*\\s*}}",
-    "risky_events":["pull_request_target","issues","issue_comment"]
+    "triggers":["pull_request_target","issues","issue_comment"]
 }
