@@ -1,4 +1,3 @@
-import subprocess
 import pydash as _
 
 
