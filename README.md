@@ -5,7 +5,7 @@
 ![version](https://img.shields.io/github/v/release/magmanu/github-workflow-security-scanner)
 ![commit](https://img.shields.io/github/last-commit/magmanu/github-workflow-security-scanner)
 [![sast](https://img.shields.io/badge/SAST-CodeQL-black.svg)](https://github.com/magmanu/github-workflow-security-scanner/actions/workflows/github-code-scanning/codeql)
-[![sca](https://img.shields.io/badge/sca-dependabot-blue.svg)](https://github.com/dependabot)
+[![sca](https://img.shields.io/badge/SCA-dependabot-blue.svg)](https://github.com/magmanu/github-workflow-security-scanner/pulls?q=is%3Apr+author%3Aapp%2Fdependabot+)
 [![style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <!-- ![workflow](https://img.shields.io/github/actions/workflow/status/magmanu/github_actions_auditor/pytest.yml) -->
 <!-- ![coverage](./docs/coverage.svg) -->
@@ -48,6 +48,7 @@ jobs:
             BRANCH: ${{ github.ref_name}}
 
 ```
+
 ## Security
 
 GWoSS uses GitHub's GraphQL endoint, so for the time being, it requires a classic token to run. Due to this, an API token is required. You can generate a basic PAT token with no read access for this.
@@ -55,15 +56,17 @@ GWoSS uses GitHub's GraphQL endoint, so for the time being, it requires a classi
 ## What checks are currently in place?
 
 See them [here](scan_config.json)
+
 ## To do: Wanna Collaborate?
 
 - [ ] [Feat] Enable org/user scan
 - [ ] [Feat] Add `result.md` to PR comment
 - [ ] [Feat] Add supply chain to `result.md` table and vulnerability count
+- [ ] [Feat] Perhaps migrate the action auditor here too?
 - [ ] [Chore] Add tests
+- [ ] [Chore] Run black and unit testing on `pull_request` events
 
-
-## Ideas for next steps
+## POssible for next steps
 
 * Check if actions use full sha or tag rather than branch name
 * Check for [GitHub Action evaluates curl's output](https://docs.boostsecurity.io/rules/cicd-gha-curl-eval.html)
