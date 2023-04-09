@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 from lib.logger import AuditLogger
+from lib.reporter import write_to_file
 
 from api_comms.query_data import return_query, validation_query
 
@@ -77,11 +78,11 @@ class GHWrapper:
             if repo_workflows:  # this repo has workflows
                 repos_all[repo_name] = repo_workflows
             else:
-                AuditLogger.warning(f"* Repo {repo_name} has no workflow.  ")
+                write_to_file(f"* Repo {repo_name} has no workflow.  ")
         return repos_all
 
     def get_multiple_repos(self, target_name, branch_name, target_type="org"):
-        AuditLogger.warning(f"## Getting repos for {target_name}")
+        AuditLogger.warning(f"## Getting repos for [{target_name}](https://github.com/{target_name})")
         repos_all = {}
         query_type = {"org": "organization", "user": "user", "repo": "repository"}
         try:
@@ -104,7 +105,7 @@ class GHWrapper:
                             repos_all[repo_name] = repo_workflows
                             count += 1
                         else:
-                            AuditLogger.warning(
+                            write_to_file(
                                 f"* Repo {repo_name} has no workflow.  "
                             )
                     has_more = repos["data"][query_type[target_type]]["repositories"][

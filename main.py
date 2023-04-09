@@ -1,11 +1,10 @@
 import os
+# import pprint
+# pp = pprint.PrettyPrinter(depth=4)
 
-# Local imports
-
-from auditor.action_auditor import action_audit
 from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
-from lib.reporter import report
+from lib.reporter import report, write_to_file
 from auditor.main import workflow_analyzer
 
 """
@@ -32,7 +31,6 @@ def repo_analysis(repo_workflow):
             "secrets": vuln_check["secrets"],
             "issues": vuln_check["issues"],
         }
-
     return result
 
 
@@ -54,17 +52,15 @@ def main():
         )
         AuditLogger.info(f"Metric: Scanning total {count} repos")
 
-    for repo_dict in repos:
-        AuditLogger.warning(f"\n\n## Audit for {repo_dict}")
-        repo_workflows = repos[repo_dict]
+    for repo_name in repos:
+        AuditLogger.warning(f"\n\n## Audit: [{repo_name}](https://github.com/{repo_name})")
+        repo_workflows = repos[repo_name]
         analysis = repo_analysis(repo_workflows)
 
         for workflow in analysis:
             vuln_count += len(analysis[workflow]["issues"])
 
-    action_audit()
-
-    report(analysis, vuln_count)
+    report(analysis, vuln_count) if vuln_count > 0 else write_to_file("No issues")
 
     # Print to define if workflow step should fail
     print(vuln_count)
