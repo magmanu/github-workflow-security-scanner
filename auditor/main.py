@@ -96,4 +96,3 @@ def get_steps(environs: dict, all_jobs: dict, job_name: str) -> list:
     except:
         AuditLogger.error(">> Environ variable is malformed")
     return steps
-

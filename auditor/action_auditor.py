@@ -25,7 +25,6 @@ def get_actions_publishers(actions: dict) -> dict[str, list]:
 
 
 def get_vulnerable_publishers(usernames: dict) -> list:
-
     username_not_found = []
     for username in usernames:
         is_valid_user = gh.stale_checker(username=username)
@@ -38,9 +37,8 @@ def action_audit(job_elements: dict) -> list:
     actions = get_workflow_actions(job_elements)
     result = []
 
-    if len(actions) ==  0:
+    if len(actions) == 0:
         return
-
 
     actions_by_usernames = get_actions_publishers(actions)
     vulnerable_publishers = get_vulnerable_publishers(actions_by_usernames)
@@ -48,7 +46,12 @@ def action_audit(job_elements: dict) -> list:
     for publisher in vulnerable_publishers:
         for action in actions_by_usernames[publisher]:
             step = actions[action]["step"]
-            vulnerable_actions = (",".join(actions_by_usernames[publisher]))
-            supply_chain = create_msg(step_number=step,publisher=publisher,vuln_actions=vulnerable_actions,vuln_type="supply_chain")
+            vulnerable_actions = ",".join(actions_by_usernames[publisher])
+            supply_chain = create_msg(
+                step_number=step,
+                publisher=publisher,
+                vuln_actions=vulnerable_actions,
+                vuln_type="supply_chain",
+            )
             result.append(supply_chain)
     return result

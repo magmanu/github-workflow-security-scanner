@@ -29,11 +29,11 @@ issue = {
     "pwn_requests": "The workflow is vulnerable to pwn requests. Vulnerable step: {STEP}.",
     "rce_with_user_input": "[Unsanitized input](https://securitylab.github.com/research/github-actions-untrusted-input/) detected with {REGEX} in {STEP}. Potentially malicious input called through GitHub context: `{ENV_NAME}:{ENV_VALUE}`.",
     "rce_general": "RCE detected with {REGEX}. Usage of `{MATCH}` found in {STEP}.",
-    "supply_chain": "User/Org `{PUBLISHER}` not found in Github. Actions by this publisher could be maliciously taken over."
+    "supply_chain": "User/Org `{PUBLISHER}` not found in Github. Actions by this publisher could be maliciously taken over.",
 }
 remediation = {
     "pwn_requests": "Do NOT checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/).",
     "rce_with_user_input": "Sanitise `{MATCH}` with an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or use an action with arguments.",
     "rce_general": "Sanitise `{MATCH}` with an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable) or use an action with arguments.",
-    "supply_chain": "Replace the actions `{ACTIONS}` with the updated username for the publisher, or replace it altoghter with a new one or your own fork."
+    "supply_chain": "Replace the actions `{ACTIONS}` with the updated username for the publisher, or replace it altoghter with a new one or your own fork.",
 }

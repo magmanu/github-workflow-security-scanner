@@ -1,4 +1,5 @@
 import os
+
 # import pprint
 # pp = pprint.PrettyPrinter(depth=4)
 
@@ -53,7 +54,9 @@ def main():
         AuditLogger.info(f"Metric: Scanning total {count} repos")
 
     for repo_name in repos:
-        AuditLogger.warning(f"\n\n## Audit: [{repo_name}](https://github.com/{repo_name})")
+        AuditLogger.warning(
+            f"\n\n## Audit: [{repo_name}](https://github.com/{repo_name})"
+        )
         repo_workflows = repos[repo_name]
         analysis = repo_analysis(repo_workflows)
 

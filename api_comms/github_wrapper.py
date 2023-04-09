@@ -82,7 +82,9 @@ class GHWrapper:
         return repos_all
 
     def get_multiple_repos(self, target_name, branch_name, target_type="org"):
-        AuditLogger.warning(f"## Getting repos for [{target_name}](https://github.com/{target_name})")
+        AuditLogger.warning(
+            f"## Getting repos for [{target_name}](https://github.com/{target_name})"
+        )
         repos_all = {}
         query_type = {"org": "organization", "user": "user", "repo": "repository"}
         try:
@@ -105,9 +107,7 @@ class GHWrapper:
                             repos_all[repo_name] = repo_workflows
                             count += 1
                         else:
-                            write_to_file(
-                                f"* Repo {repo_name} has no workflow.  "
-                            )
+                            write_to_file(f"* Repo {repo_name} has no workflow.  ")
                     has_more = repos["data"][query_type[target_type]]["repositories"][
                         "pageInfo"
                     ]["hasNextPage"]

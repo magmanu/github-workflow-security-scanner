@@ -78,7 +78,10 @@ def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
                                 issues_per_workflow.append(rce)
                     else:
                         rce = create_msg(
-                            step_number, vuln_type="rce", match=matched_strings, regex=regex
+                            step_number,
+                            vuln_type="rce",
+                            match=matched_strings,
+                            regex=regex,
                         )
                         issues_per_workflow.append(rce)
     return issues_per_workflow
@@ -89,11 +92,15 @@ def get_workflow_actions(job_elements: dict) -> dict:
     workflow_actions = {}
     for actions in _.get(job_elements, "all_actions"):
         for step_number, step_dict in actions.items():
-            action_args =  _.get(step_dict, "with")
-            action = {_.get(step_dict, "uses"): {"step":step_number, "arguments": action_args}}
+            action_args = _.get(step_dict, "with")
+            action = {
+                _.get(step_dict, "uses"): {
+                    "step": step_number,
+                    "arguments": action_args,
+                }
+            }
             workflow_actions.update(action)
     return workflow_actions
-
 
 
 def get_env_kv_provided_by_user(
@@ -143,13 +150,13 @@ def get_secrets_names(full_yaml: str) -> list:
 
 
 def create_msg(
-    step_number: int, 
-    vuln_type="", 
-    match="", 
-    input={}, 
+    step_number: int,
+    vuln_type="",
+    match="",
+    input={},
     regex="",
-    publisher ="",
-    vuln_actions=""
+    publisher="",
+    vuln_actions="",
 ) -> dict[str, str]:
     if vuln_type == "pwn":
         problem = f"{_.get(issue, 'pwn_requests')}".replace("{STEP}", step_number)
