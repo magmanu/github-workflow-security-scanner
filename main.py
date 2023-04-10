@@ -37,9 +37,7 @@ def main():
     vuln_count = 0
 
     target_type = os.environ.get("TARGET_TYPE", None)  # repo, org, or user
-    target_input = os.environ.get(
-        "TARGET_INPUT", None
-    ) 
+    target_input = os.environ.get("TARGET_INPUT", None)
     target_branch = os.environ.get("BRANCH", None) or "HEAD"
 
     if target_type == "repo":
