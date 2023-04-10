@@ -1,8 +1,5 @@
 import os
 
-# import pprint
-# pp = pprint.PrettyPrinter(depth=4)
-
 from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
 from lib.reporter import report, write_to_file
@@ -41,8 +38,8 @@ def main():
 
     target_type = os.environ.get("TARGET_TYPE", None)  # repo, org, or user
     target_input = os.environ.get(
-        "REPOSITORY", None
-    )  # can be repo url, or a username for org/user
+        "TARGET_INPUT", None
+    ) 
     target_branch = os.environ.get("BRANCH", None) or "HEAD"
 
     if target_type == "repo":
@@ -63,9 +60,10 @@ def main():
         for workflow in analysis:
             vuln_count += len(analysis[workflow]["issues"])
 
-    report(analysis, vuln_count) if vuln_count > 0 else write_to_file("No issues")
+        report(analysis, vuln_count) if vuln_count > 0 else write_to_file("No issues")
 
-    # Print to define if workflow step should fail
+    # DO NOT REMOVE PRINT
+    # Used to push result to stdout in the github runner and evaluate if CI should break or not
     print(vuln_count)
 
 

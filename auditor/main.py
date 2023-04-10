@@ -23,7 +23,6 @@ def workflow_analyzer(content: str) -> dict[str, list]:
     wrkfl = WorkflowParser(content)
 
     if is_workflow_valid(wrkfl):
-        # help understand impact of RCE
         _.get(result, "secrets").append(get_secrets_names(content))
 
         all_workflow_triggers = wrkfl.get_event_triggers()

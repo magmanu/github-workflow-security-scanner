@@ -1,17 +1,21 @@
 name: 'GitHub Workflow Security Scanner'
 description: 'A GitHub Action that performs static analysis on your workflows'
 inputs:
-  REPO_TOKEN:
+  GH_TOKEN:
     description: 'Github token'
     required: true
   SHOULD_BREAK:
     description: 'Boolean to determine if CI should break when a vulnerability is found'
     required: false
     default: false
-  REPOSITORY:
-    description: 'Repository with owner name where action should run'
+  TYPE:
+    description: 'Type of resource to be analysed. Three acceptable values: repo, org, user'
+    default: 'repo'
+  TARGET:
+    description: 'Org or user name, or repository with format "owner/reponame"'
   BRANCH:
     description: 'Branch to run the scan on.'
+    default: 'HEAD'
   
 runs:
   using: 'composite'
@@ -40,8 +44,8 @@ runs:
           while read line; do echo "$line" >> $GITHUB_STEP_SUMMARY; done < $filename
       env:
         TARGET_TYPE: "repo"
-        TARGET_INPUT: ${{ env.REPOSITORY }}
-        TOKEN: ${{ inputs.REPO_TOKEN }}
+        TARGET_INPUT: ${{ env.TARGET }}
+        TOKEN: ${{ inputs.GH_TOKEN }}
         TARGET_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
 
