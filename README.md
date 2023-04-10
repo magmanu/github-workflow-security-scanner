@@ -112,13 +112,18 @@ jobs:
 
 ### CLI Tool
 
-To run GWoSS locally, clone this repo and create a `.env` file with the relevant parameters
+To run GWoSS locally, clone this repo, cd into it and create a `.env` file with the relevant parameters.
+Then, run `pip install -r requirements.txt && python main.py`.  
+GWoSS was developed in python 3.11.1 and tested in python 3.10.  
+
 ## Security
 
 ### Token
+
 GWoSS queries Github's GraphQL and requires only read access. As for the time being fine grained tokens do not work with GraphQL, please generate a [classic PAT token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with `repo` permissions. If you're using GWoSS to scan an organization repo, you might need to [get the PAT SSO'ed first](https://docs.github.com/en/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on).  
 
-### Software Usage
+### GWoSS Usage
+
 This is in the license, but just to reinforce: You may use this software only to scan and assess your own software and systems and may not use it for any malicious or illegal purpose. You may disclose any potential vulnerabilities you detect with this software only to the developer of the software in which you detect the potential vulnerability.
 
 ## What checks are currently in place?
