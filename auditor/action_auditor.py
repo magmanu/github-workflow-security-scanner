@@ -37,8 +37,8 @@ def action_audit(job_elements: dict) -> list:
     actions = get_workflow_actions(job_elements)
     result = []
 
-    if len(actions) == 0:
-        return
+    if actions.keys() == 0:
+        return result
 
     actions_by_usernames = get_actions_publishers(actions)
     vulnerable_publishers = get_vulnerable_publishers(actions_by_usernames)

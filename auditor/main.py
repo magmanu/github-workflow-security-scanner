@@ -34,13 +34,14 @@ def workflow_analyzer(content: str) -> dict[str, list]:
             dangerous_triggers = get_dangerous_triggers(triggers=all_workflow_triggers)
 
             try:
-                # BUG: None got included and made vuln_count 1 more than it should
                 rce = check_rce_vuln(job_elements)
                 pwn = check_pwn_requests(dangerous_triggers, job_elements)
                 vulnerable_supply_chain = action_audit(job_elements)
+
                 _.get(result, "issues").append(rce)
                 _.get(result, "issues").append(pwn)
                 _.get(result, "issues").append(vulnerable_supply_chain)
+
             except Exception as workflow_err:
                 AuditLogger.error(
                     f">>> Error parsing workflow. Error is {str(workflow_err)}"
