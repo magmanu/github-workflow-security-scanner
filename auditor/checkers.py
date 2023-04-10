@@ -35,11 +35,10 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list[dic
     See an interesting disclosure story here: https://github.com/justinsteven/advisories/blob/main/2021_github_actions_checkspelling_token_leak_via_advice_symlink.md
     """
     issues = []
-    action_storage = open("actions.txt", "a+")
+
     for action in _.get(job_elements, "all_actions"):
         for step_number, step_dict in action.items():
             action_name = _.get(step_dict, "uses")
-            action_storage.write(f"{action_name}\n")
             if "actions/checkout" in action_name:
                 # check if specific branch is checked out
                 if _.get(step_dict, "with"):
@@ -47,9 +46,8 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list[dic
                         risky_commits = vuln_analyzer.risky_commit(referenced=ref_value)
                         if risky_commits:
                             if "pull_request_target" in dangerous_triggers:
-                                pwn = create_msg(step_number, type="pwn")
+                                pwn = create_msg(step_number, vuln_type="pwn")
                                 issues.append(pwn)
-    action_storage.close()
     return issues
 
 
@@ -72,7 +70,7 @@ def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
                             for input in exploitable_input:
                                 rce = create_msg(
                                     step_number,
-                                    type="rce",
+                                    vuln_type="rce",
                                     match=matched_strings,
                                     input=input,
                                     regex=regex,
@@ -80,10 +78,29 @@ def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
                                 issues_per_workflow.append(rce)
                     else:
                         rce = create_msg(
-                            step_number, type="rce", match=matched_strings, regex=regex
+                            step_number,
+                            vuln_type="rce",
+                            match=matched_strings,
+                            regex=regex,
                         )
                         issues_per_workflow.append(rce)
     return issues_per_workflow
+
+
+def get_workflow_actions(job_elements: dict) -> dict:
+    """Returns dictionary {"action_name": "step_id"}"""
+    workflow_actions = {}
+    for actions in _.get(job_elements, "all_actions"):
+        for step_number, step_dict in actions.items():
+            action_args = _.get(step_dict, "with")
+            action = {
+                _.get(step_dict, "uses"): {
+                    "step": step_number,
+                    "arguments": action_args,
+                }
+            }
+            workflow_actions.update(action)
+    return workflow_actions
 
 
 def get_env_kv_provided_by_user(
@@ -133,19 +150,25 @@ def get_secrets_names(full_yaml: str) -> list:
 
 
 def create_msg(
-    step_number: int, type="", match="", input={}, regex=""
+    step_number: int,
+    vuln_type="",
+    match="",
+    input={},
+    regex="",
+    publisher="",
+    vuln_actions="",
 ) -> dict[str, str]:
-    if type == "pwn":
-        problem = f"{_.get(issue, 'pwn_requests')} {step_number}"
+    if vuln_type == "pwn":
+        problem = f"{_.get(issue, 'pwn_requests')}".replace("{STEP}", step_number)
         solution = _.get(remediation, "pwn_requests")
-    if input == {} and type == "rce":
+    if input == {} and vuln_type == "rce":
         problem = (
             f"{_.get(issue, 'rce_general')}".replace("{REGEX}", regex)
             .replace("{STEP}", step_number)
             .replace("{MATCH}", match[0])
         )
         solution = _.get(remediation, "rce_general").replace("{MATCH}", match[0])
-    if type == "rce":
+    if vuln_type == "rce":
         for env_name in input:
             problem = (
                 _.get(issue, "rce_with_user_input")
@@ -157,5 +180,8 @@ def create_msg(
             solution = _.get(remediation, "rce_with_user_input").replace(
                 "{MATCH}", f"{','.join(match)}"
             )
+    if vuln_type == "supply_chain":
+        problem = f"{_.get(issue, 'supply_chain')}".replace("{PUBLISHER}", publisher)
+        solution = _.get(remediation, "supply_chain").replace("{ACTIONS}", vuln_actions)
 
     return {"issue": problem, "remediation": solution}

@@ -1,11 +1,8 @@
 import os
 
-# Local imports
-
-from auditor.action_auditor import action_audit
 from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
-from lib.reporter import report
+from lib.reporter import report, write_to_file
 from auditor.main import workflow_analyzer
 
 """
@@ -32,7 +29,6 @@ def repo_analysis(repo_workflow):
             "secrets": vuln_check["secrets"],
             "issues": vuln_check["issues"],
         }
-
     return result
 
 
@@ -41,9 +37,7 @@ def main():
     vuln_count = 0
 
     target_type = os.environ.get("TARGET_TYPE", None)  # repo, org, or user
-    target_input = os.environ.get(
-        "REPOSITORY", None
-    )  # can be repo url, or a username for org/user
+    target_input = os.environ.get("TARGET_INPUT", None)
     target_branch = os.environ.get("BRANCH", None) or "HEAD"
 
     if target_type == "repo":
@@ -54,19 +48,20 @@ def main():
         )
         AuditLogger.info(f"Metric: Scanning total {count} repos")
 
-    for repo_dict in repos:
-        AuditLogger.warning(f"\n\n## Audit for {repo_dict}")
-        repo_workflows = repos[repo_dict]
+    for repo_name in repos:
+        AuditLogger.warning(
+            f"\n\n## Audit: [{repo_name}](https://github.com/{repo_name})"
+        )
+        repo_workflows = repos[repo_name]
         analysis = repo_analysis(repo_workflows)
 
         for workflow in analysis:
             vuln_count += len(analysis[workflow]["issues"])
 
-    action_audit()
+        report(analysis, vuln_count) if vuln_count > 0 else write_to_file("No issues")
 
-    report(analysis, vuln_count)
-
-    # Print to define if workflow step should fail
+    # DO NOT REMOVE PRINT
+    # Used to push result to stdout in the github runner and evaluate if CI should break or not
     print(vuln_count)
 
 

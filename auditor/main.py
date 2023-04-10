@@ -1,5 +1,8 @@
 import pydash as _
 
+from workflow import WorkflowParser, WorkflowVulnAudit
+from auditor.action_auditor import action_audit
+from lib.logger import AuditLogger
 from auditor.checkers import (
     get_secrets_names,
     get_dangerous_triggers,
@@ -7,8 +10,6 @@ from auditor.checkers import (
     check_rce_vuln,
     check_pwn_requests,
 )
-from workflow import WorkflowParser, WorkflowVulnAudit
-from lib.logger import AuditLogger
 
 vuln_analyzer = WorkflowVulnAudit()
 
@@ -22,7 +23,6 @@ def workflow_analyzer(content: str) -> dict[str, list]:
     wrkfl = WorkflowParser(content)
 
     if is_workflow_valid(wrkfl):
-        # help understand impact of RCE
         _.get(result, "secrets").append(get_secrets_names(content))
 
         all_workflow_triggers = wrkfl.get_event_triggers()
@@ -35,14 +35,19 @@ def workflow_analyzer(content: str) -> dict[str, list]:
             try:
                 rce = check_rce_vuln(job_elements)
                 pwn = check_pwn_requests(dangerous_triggers, job_elements)
+                vulnerable_supply_chain = action_audit(job_elements)
+
                 _.get(result, "issues").append(rce)
                 _.get(result, "issues").append(pwn)
+                _.get(result, "issues").append(vulnerable_supply_chain)
+
             except Exception as workflow_err:
                 AuditLogger.error(
                     f">>> Error parsing workflow. Error is {str(workflow_err)}"
                 )
-    result["issues"] = _.flatten(_.get(result, "issues"))
-    result["secrets"] = _.flatten(_.get(result, "secrets"))
+    result["issues"] = _.flatten_deep(_.get(result, "issues"))
+    result["secrets"] = _.flatten_deep(_.get(result, "secrets"))
+
     return result
 
 
@@ -91,22 +96,3 @@ def get_steps(environs: dict, all_jobs: dict, job_name: str) -> list:
     except:
         AuditLogger.error(">> Environ variable is malformed")
     return steps
-
-
-def create_msg(
-    step_number: int, type: str = "", match: str = "", input: dict = {}, regex: str = ""
-) -> dict[str, str]:
-    if type == "pwn":
-        issue = f"The workflow is vulnerable to pwn requests. Vulnerable step: {step_number}"
-        remediation = "Do not checkout the PR branch when using `pull_request_type`. Consider [other options](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)"
-    if input == {} and type == "rce":
-        issue = f"RCE detected with {regex} in {step_number}"
-        remediation = f" Please sanitise {','.join(match)} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable)"
-    if type == "rce":
-        for env_name in input:
-            issue = (
-                f"RCE detected with {regex} in {step_number}. ENV variable {env_name} is called through GitHub context and takes user input {input[env_name]}",
-            )
-            remediation = f" Please sanitise {','.join(match)} by using an [intermediate environment variable](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable)"
-
-    return {"issue": issue, "remediation": remediation}

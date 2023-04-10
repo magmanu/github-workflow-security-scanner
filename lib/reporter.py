@@ -9,10 +9,12 @@ def build_table_body(result: dict) -> list[dict]:
         issues_list = _.get(result[wrkfl_name], "issues")
         if issues_list:
             for issue in issues_list:
-                desc = _.get(issue, "issue")
-                remediation = _.get(issue, "remediation")
-                string = f"| {wrkfl_name} | {secrets} | {desc} | {remediation} |"
-                strings.append(string)
+                if issue_desc := _.get(issue, "issue"):
+                    remediation = _.get(issue, "remediation")
+                    string = (
+                        f"| {wrkfl_name} | {secrets} | {issue_desc} | {remediation} |"
+                    )
+                    strings.append(string)
         else:
             string = f"| {wrkfl_name} | {secrets} | None | None |"
             strings.append(string)
@@ -20,7 +22,11 @@ def build_table_body(result: dict) -> list[dict]:
 
 
 def report(result: dict, vuln_count: int):
-    summary_subheader = f"### Vulnerabilities found in this branch: {vuln_count}"
+    summary_subheader = f"### Vulnerabilities found: {vuln_count}"
+
+    if vuln_count == 0:
+        return
+
     header = [
         "| Workflow | Secrets | Issues | Recommendation |",
         "| --- | --- | --- | --- |",

@@ -1,38 +1,57 @@
+import re
+import pydash as _
+
 from api_comms.github_wrapper import GHWrapper
 from lib.logger import AuditLogger
-from pathlib import Path
-import re
 from dotenv import load_dotenv
+from auditor.checkers import get_workflow_actions, create_msg
 
 load_dotenv()
 gh = GHWrapper()
 
 
-def read_actions_file():
-    array_of_usernames = []
-    with open("actions.txt", "r") as lines:
-        for line in lines:
-            username = line.split("/")[0]
-            username_regex = re.compile("[A-Za-z0-9-]*")
-            if username_regex.fullmatch(username):
-                if username not in array_of_usernames:
-                    array_of_usernames.append(username)
-    return array_of_usernames
+def get_actions_publishers(actions: dict) -> dict[str, list]:
+    """Returns dictionary {publisher: [actions}"""
+    usernames = {}
+    for action_name in actions:
+        username = action_name.split("/")[0]
+        username_regex = re.compile("[A-Za-z0-9-]*")
+        if username_regex.fullmatch(username):
+            if username not in usernames.keys():
+                usernames.update({username: [action_name]})
+            else:
+                usernames[username].append(action_name)
+    return usernames
 
 
-def check_usernames(username_list):
-    for username in username_list:
-        renamed_or_not = gh.stale_checker(username=username)
-        if not renamed_or_not:
-            AuditLogger.warning(
-                f"\n**Warning: Security Issue** <br> Supply chain. {username} was renamed but used in workflows. Signup the username at https://github.com to make sure."
+def get_vulnerable_publishers(usernames: dict) -> list:
+    username_not_found = []
+    for username in usernames:
+        is_valid_user = gh.stale_checker(username=username)
+        if not is_valid_user:
+            username_not_found.append(username)
+    return username_not_found
+
+
+def action_audit(job_elements: dict) -> list:
+    actions = get_workflow_actions(job_elements)
+    result = []
+
+    if actions.keys() == 0:
+        return result
+
+    actions_by_usernames = get_actions_publishers(actions)
+    vulnerable_publishers = get_vulnerable_publishers(actions_by_usernames)
+
+    for publisher in vulnerable_publishers:
+        for action in actions_by_usernames[publisher]:
+            step = actions[action]["step"]
+            vulnerable_actions = ",".join(actions_by_usernames[publisher])
+            supply_chain = create_msg(
+                step_number=step,
+                publisher=publisher,
+                vuln_actions=vulnerable_actions,
+                vuln_type="supply_chain",
             )
-
-
-def action_audit():
-    if Path("actions.txt").exists():
-        usernames = read_actions_file()
-        check_usernames(usernames)
-        Path("actions.txt").unlink()
-    else:
-        AuditLogger.warning("No actions.txt file to scan. Supply chain scan complete.")
+            result.append(supply_chain)
+    return result
