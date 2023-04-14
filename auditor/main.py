@@ -8,6 +8,7 @@ from auditor.checkers import (
     is_workflow_valid,
     check_rce_vuln,
     check_pwn_requests,
+    get_deprecated_commands
 )
 
 vuln_analyzer = WorkflowVulnAudit()
@@ -31,6 +32,7 @@ def workflow_analyzer(content: str) -> dict[str, list]:
             dangerous_triggers = get_dangerous_triggers(triggers=wrkfl.triggers)
 
             try:
+                deprecated_commands = get_deprecated_commands(wrkfl,job_elements)
                 rce = check_rce_vuln(job_elements)
                 pwn = check_pwn_requests(dangerous_triggers, job_elements)
                 vulnerable_supply_chain = action_audit(job_elements)
@@ -38,6 +40,7 @@ def workflow_analyzer(content: str) -> dict[str, list]:
                 _.get(result, "issues").append(rce)
                 _.get(result, "issues").append(pwn)
                 _.get(result, "issues").append(vulnerable_supply_chain)
+                _.get(result, "issues").append(deprecated_commands)
 
             except Exception as workflow_err:
                 AuditLogger.error(

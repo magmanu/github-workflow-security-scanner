@@ -132,6 +132,7 @@ This is in the license, but just to reinforce: You may use this software only to
 - [gwoss-002] Potentially malicious commits
 - [gwoss-003] pwn requests
 - [gwoss-004] namespace supply chain vulnerability (user/org namespace is vacant but the action still in use via redirect)
+- [gwoss-005] check for deprecated commands `save-state` and `set-outout` on own workflow
 
 ## To do: Wanna Collaborate?
 
@@ -147,7 +148,7 @@ This is in the license, but just to reinforce: You may use this software only to
 * Check for [GitHub Action evaluates curl's output](https://docs.boostsecurity.io/rules/cicd-gha-curl-eval.html)
 * Check for [workflow inputs](https://docs.boostsecurity.io/rules/cicd-gha-workflow-dispatch-inputs.html)
 * Check for [write-all](https://docs.boostsecurity.io/rules/cicd-gha-write-all-permissions.html)
-* Add scan for intentional deprecated commands [ACTIONS_ALLOW_UNSECURE_COMMANDS](https://docs.boostsecurity.io/rules/cicd-gha-unsecure-commands.html) and `save-state` and `set-outout`?
+* Add scan for intentional deprecated commands [ACTIONS_ALLOW_UNSECURE_COMMANDS](https://docs.boostsecurity.io/rules/cicd-gha-unsecure-commands.html)
 
 ## Notice
 

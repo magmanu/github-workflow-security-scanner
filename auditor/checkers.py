@@ -52,7 +52,6 @@ def check_pwn_requests(dangerous_triggers: list, job_elements: dict) -> list[dic
 
 def check_rce_vuln(job_elements: dict) -> list[dict[str, str]]:
     issues_per_workflow = []
-
     for runner_command in job_elements["runner_commands"]:
         for step_number, step_dict in runner_command.items():
             dangerous_inputs = vuln_analyzer.get_unsafe_inputs(
@@ -133,6 +132,21 @@ def get_dangerous_triggers(triggers: list) -> list:
     return dangeours_triggers
 
 
+def get_deprecated_commands(name, job_elements: dict) -> list[dict]:
+    issues = []
+
+    for action in _.get(job_elements, "runner_commands"):
+        for step_number, step_dict in action.items():
+            run_commands = _.get(step_dict, "run")
+            if "::set-output" in run_commands:
+                deprecated = create_msg(step_number, vuln_type="deprecated", deprecated="set-output")
+                issues.append(deprecated)
+            if "::save-state" in run_commands:
+                deprecated = create_msg(step_number, vuln_type="deprecated", deprecated="save-state")
+                issues.append(deprecated)
+    return issues
+
+
 def create_msg(
     step_number: int,
     vuln_type="",
@@ -141,6 +155,7 @@ def create_msg(
     regex="",
     publisher="",
     vuln_actions="",
+    deprecated=""
 ) -> dict[str, str]:
 
     message_interpolations = {
@@ -149,7 +164,8 @@ def create_msg(
         "MATCH": _.head(match),
         "ENV_NAME": input,
         "PUBLISHER": publisher,
-        "ACTIONS": vuln_actions
+        "ACTIONS": vuln_actions,
+        "BAD_COMMAND": deprecated,
     }
 
     mapping = {
@@ -157,13 +173,17 @@ def create_msg(
             "pwn": ["STEP"],
             "rce_general": ["STEP", "REGEX", "MATCH"],
             "rce_with_user_input": ["REGEX","STEP", "ENV_NAME", "ENV_VALUE"],
-            "supply_chain": ["PUBLISHER"]
+            "supply_chain": ["PUBLISHER"],
+            "deprecated": ["STEP", "BAD_COMMAND"]
+
         },
         "remediations": {
             "pwn": [],
             "rce_general": ["MATCH"],
             "rce_with_user_input": ["MATCH"],
-            "supply_chain": ["ACTIONS"]
+            "supply_chain": ["ACTIONS"],
+            "deprecated": []
+
         }
     }
 
