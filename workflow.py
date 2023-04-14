@@ -4,11 +4,13 @@ import yaml
 
 
 class WorkflowParser:
-    def __init__(self, yaml_content: str):
+    def __init__(self, res: str):
         try:
+            self.name = res.get("name")
             self.safe_yml_file = yaml.safe_load(
-                yaml_content
+                res.get("content")
             )  # We don't want a vulnerability ;)
+
         except:
             self.safe_yml_file = {"failed": True}
 
