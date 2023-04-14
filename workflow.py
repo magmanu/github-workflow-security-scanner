@@ -2,18 +2,24 @@ import json
 import re
 import yaml
 
+from auditor.security_settings import secrets_pattern
 
 class WorkflowParser:
-    def __init__(self, yaml_content: str):
+    def __init__(self, res: str):
         try:
+            self.name = res.get("name")
             self.safe_yml_file = yaml.safe_load(
-                yaml_content
+                res.get("content")
             )  # We don't want a vulnerability ;)
+
         except:
             self.safe_yml_file = {"failed": True}
+        
+        self.triggers = self.get_event_triggers()
+        self.jobs = self.get_jobs()
+        self.secrets = self.get_secrets()
 
     def get_event_triggers(self) -> list:
-        # Check what starts a workflow. Can be list or dict
         if self.safe_yml_file.get(True, None):
             if isinstance(self.safe_yml_file[True], list):
                 return self.safe_yml_file[True]
@@ -22,14 +28,16 @@ class WorkflowParser:
             else:
                 return [self.safe_yml_file[True]]
 
-    def get_jobs(self) -> dict:
-        return self.safe_yml_file.get("jobs", None)
+    def get_jobs(self) -> list:
+        "Returns a list so we can use the index as a job id"
+        jobs = self.safe_yml_file.get("jobs", None)
+        all_jobs = []
+        for job in jobs:
+            all_jobs.append(jobs[job])
+        return all_jobs
 
-    def get_jobs_count(self) -> int:
-        # list how many jobs execute. Jobs run on their own individual runners.
-        return len(self.safe_yml_file["jobs"].keys())
 
-    def get_steps_for_jobs(self, job_dict: dict) -> list:
+    def get_steps_for_job(self, job_dict: dict) -> list:
         # return a list of steps in a given job dictionary
         return job_dict.get("steps", None)
 
@@ -39,8 +47,22 @@ class WorkflowParser:
         with_input = step.get("with", None)
         step_environ = step.get(
             "env", None
-        )  # you can define environment variables per step.
+        )
         return actions, run_command, with_input, step_environ
+
+    def get_secrets(self) -> list:
+        """
+        Finds all secrets being used in this workflow.
+        Not the actual secret, just the namespace.
+        Useful in case there's an RCE, we can pull these secrets.
+        """
+        found_matches = []
+        secrets = re.compile(secrets_pattern)
+        if matches := secrets.findall(json.dumps(self.safe_yml_file)):
+            for match in matches:
+                if match not in found_matches:
+                    found_matches.append(match)
+        return found_matches
 
 
 # Analyze various aspects of workflows to identify if it is risky.

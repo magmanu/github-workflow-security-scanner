@@ -22,9 +22,8 @@ def repo_analysis(repo_workflow):
 
     for workflow in repo_workflow:
         workflow_name = workflow["name"]
-        workflow_content = workflow["content"]
 
-        vuln_check = workflow_analyzer(content=workflow_content)
+        vuln_check = workflow_analyzer(workflow)
         result[workflow_name] = {
             "secrets": vuln_check["secrets"],
             "issues": vuln_check["issues"],
