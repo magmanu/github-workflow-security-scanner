@@ -2,7 +2,6 @@ import re
 import pydash as _
 
 from auditor.security_settings import (
-    secrets_pattern,
     dangerous_events,
     remediation,
     issue,
@@ -132,21 +131,6 @@ def get_dangerous_triggers(triggers: list) -> list:
         if is_trigger_dangerous(trigger):
             dangeours_triggers.append(trigger)
     return dangeours_triggers
-
-
-def get_secrets_names(full_yaml: str) -> list:
-    """
-    Finds all secrets being used in this workflow.
-    Useful in case there's an RCE, we can pull these secrets
-    :param full_yaml: The full yaml string of the workflow.
-    :return: A list of all secrets being used in this workflow."""
-    found_matches = []
-    secrets = re.compile(secrets_pattern)
-    if matches := secrets.findall(full_yaml):
-        for match in matches:
-            if match not in found_matches:
-                found_matches.append(match)
-    return found_matches
 
 
 def create_msg(

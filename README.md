@@ -128,10 +128,10 @@ This is in the license, but just to reinforce: You may use this software only to
 
 ## What checks are currently in place?
 
-- unsinitized input that could lead to injection attacks
-- potentially malicious commits
-- pwn requests
-- Actions vulnerability (user/org namespace is vacant but the action still in use via redirect)
+- [gwoss-001] Injection
+- [gwoss-002] Potentially malicious commits
+- [gwoss-003] pwn requests
+- [gwoss-004] namespace supply chain vulnerability (user/org namespace is vacant but the action still in use via redirect)
 
 ## To do: Wanna Collaborate?
 
@@ -143,7 +143,7 @@ This is in the license, but just to reinforce: You may use this software only to
 
 ## Possible next steps
 
-* Check if actions use full sha or tag rather than branch name
+* [gwoss-005] Check if actions use full sha or tag rather than branch name
 * Check for [GitHub Action evaluates curl's output](https://docs.boostsecurity.io/rules/cicd-gha-curl-eval.html)
 * Check for [workflow inputs](https://docs.boostsecurity.io/rules/cicd-gha-workflow-dispatch-inputs.html)
 * Check for [write-all](https://docs.boostsecurity.io/rules/cicd-gha-write-all-permissions.html)

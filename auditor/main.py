@@ -4,7 +4,6 @@ from workflow import WorkflowParser, WorkflowVulnAudit
 from auditor.action_auditor import action_audit
 from lib.logger import AuditLogger
 from auditor.checkers import (
-    get_secrets_names,
     get_dangerous_triggers,
     is_workflow_valid,
     check_rce_vuln,
@@ -23,14 +22,13 @@ def workflow_analyzer(content: str) -> dict[str, list]:
     wrkfl = WorkflowParser(content)
 
     if is_workflow_valid(wrkfl):
-        _.get(result, "secrets").append(get_secrets_names(content))
+        result["secrets"].append(wrkfl.secrets)
 
-        all_workflow_triggers = wrkfl.get_event_triggers()
         all_jobs = wrkfl.get_jobs()
 
         if all_jobs:
             job_elements = get_job_elements_with_id(wrkfl, all_jobs)
-            dangerous_triggers = get_dangerous_triggers(triggers=all_workflow_triggers)
+            dangerous_triggers = get_dangerous_triggers(triggers=wrkfl.triggers)
 
             try:
                 rce = check_rce_vuln(job_elements)
@@ -52,33 +50,34 @@ def workflow_analyzer(content: str) -> dict[str, list]:
 
 
 def get_job_elements_with_id(
-    wrkfl: WorkflowParser, all_jobs: dict
+    wrkfl: WorkflowParser, all_jobs: list
 ) -> dict[str, list | dict]:
     """
     Break down job elements (step, action, env and run command) and give them IDs.
     This helps the user identify where the vulnerability is.
     """
-    code_line = 1
     all_actions = []
     runner_commands = []
     environs = {}
 
-    for job_name in all_jobs:
-        steps = get_steps(environs, all_jobs, job_name)
+    for job_id, job in enumerate(all_jobs):
+        job_id += 1 # human-friendly numbering
+        steps = get_steps(environs, job)
 
-        for step_number, step in enumerate(steps):
+        for step_id, step in enumerate(steps):
+            step_id += 1 # human-friendly numbering
             actions, runner_command, with_input, step_environ = wrkfl.get_step_elements(
                 step
             )
             if actions:
-                all_actions.append({f"Job{code_line}.Step{step_number+1}": step})
+                all_actions.append({f"Job{job_id}.Step{step_id}": step})
             if runner_command:
-                runner_commands.append({f"Job{code_line}.Step{step_number+1}": step})
+                runner_commands.append({f"Job{job_id}.Step{step_id}": step})
             if step_environ:
                 if isinstance(step_environ, str):
-                    step_environ = {f"{step_number}{step}": step_environ}
+                    step_environ = {f"{step_id}{step}": step_environ}
                 environs.update(step_environ)
-        code_line += 1
+
     return {
         "all_actions": all_actions,
         "runner_commands": runner_commands,
@@ -86,13 +85,12 @@ def get_job_elements_with_id(
     }
 
 
-def get_steps(environs: dict, all_jobs: dict, job_name: str) -> list:
-    job_content = all_jobs[job_name]
-    steps = _.get(job_content, "steps")
+def get_steps(environs: dict, job: dict) -> list:
+    steps = _.get(job, "steps")
     if not steps:
-        steps = job_content
+        steps = job
     try:
-        environs.update(_.get(job_content, "env", {}))
+        environs.update(_.get(job, "env", {}))
     except:
         AuditLogger.error(">> Environ variable is malformed")
     return steps
