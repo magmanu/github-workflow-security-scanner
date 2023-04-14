@@ -152,36 +152,60 @@ def get_secrets_names(full_yaml: str) -> list:
 def create_msg(
     step_number: int,
     vuln_type="",
-    match="",
+    match=[],
     input={},
     regex="",
     publisher="",
     vuln_actions="",
 ) -> dict[str, str]:
-    if vuln_type == "pwn":
-        problem = f"{_.get(issue, 'pwn_requests')}".replace("{STEP}", step_number)
-        solution = _.get(remediation, "pwn_requests")
-    if input == {} and vuln_type == "rce":
-        problem = (
-            f"{_.get(issue, 'rce_general')}".replace("{REGEX}", regex)
-            .replace("{STEP}", step_number)
-            .replace("{MATCH}", match[0])
-        )
-        solution = _.get(remediation, "rce_general").replace("{MATCH}", match[0])
-    if vuln_type == "rce":
-        for env_name in input:
-            problem = (
-                _.get(issue, "rce_with_user_input")
-                .replace("{REGEX}", regex)
-                .replace("{STEP}", step_number)
-                .replace("{ENV_NAME}", input)
-                .replace("{ENV_VALUE}", input[env_name])
-            )
-            solution = _.get(remediation, "rce_with_user_input").replace(
-                "{MATCH}", f"{','.join(match)}"
-            )
-    if vuln_type == "supply_chain":
-        problem = f"{_.get(issue, 'supply_chain')}".replace("{PUBLISHER}", publisher)
-        solution = _.get(remediation, "supply_chain").replace("{ACTIONS}", vuln_actions)
 
-    return {"issue": problem, "remediation": solution}
+    message_interpolations = {
+        "STEP": step_number,
+        "REGEX": regex,
+        "MATCH": _.head(match),
+        "ENV_NAME": input,
+        "PUBLISHER": publisher,
+        "ACTIONS": vuln_actions
+    }
+
+    mapping = {
+        "issues": {
+            "pwn": ["STEP"],
+            "rce_general": ["STEP", "REGEX", "MATCH"],
+            "rce_with_user_input": ["REGEX","STEP", "ENV_NAME", "ENV_VALUE"],
+            "supply_chain": ["PUBLISHER"]
+        },
+        "remediations": {
+            "pwn": [],
+            "rce_general": ["MATCH"],
+            "rce_with_user_input": ["MATCH"],
+            "supply_chain": ["ACTIONS"]
+        }
+    }
+
+    if input == {} and vuln_type == "rce":
+        vuln_type = "rce_general"
+    if vuln_type == "rce":
+        env = ""
+        for env_name in input:
+            vuln_type = "rce_with_user_input"
+            message_interpolations["ENV_VALUE"] = env.concat(env_name)
+
+    return {
+        "issue": build_message(vuln_type, message_interpolations, mapping, "issues"), 
+        "remediation": build_message(vuln_type, message_interpolations, mapping, "remediations")
+        }
+
+def build_message(vuln_type:str, interpolations, mapping, flag):
+    if flag == "issues":
+        source = issue
+    else:
+        source = remediation
+
+    message = _.get(source, vuln_type)
+    if not mapping[flag][vuln_type]:
+        return message
+    for term in mapping[flag][vuln_type]:
+        message = message.replace(f"{{{term}}}", interpolations[term])
+    return message
+
