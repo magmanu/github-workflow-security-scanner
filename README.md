@@ -134,6 +134,12 @@ This is in the license, but just to reinforce: You may use this software only to
 - [gwoss-004] namespace supply chain vulnerability (user/org namespace is vacant but the action still in use via redirect)
 - [gwoss-005] check for deprecated commands `save-state` and `set-outout` on own workflow
 
+DOOMS DAY:  
+
+- "False" path is working
+- True path is running the scan on the workflow itself. Needs to skip.
+- True path is reading action's workflow (ok-ish), but we want to read the action itself too
+
 ## To do: Wanna Collaborate?
 
 - [ ] [Feat] Add `result.md` to PR comment
