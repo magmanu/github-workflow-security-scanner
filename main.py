@@ -20,7 +20,7 @@ def main():
     target_type = os.environ.get("TARGET_TYPE", None)  # repo, org, or user
     target_input = os.environ.get("TARGET_INPUT", None)
     target_branch = os.environ.get("BRANCH", None) or "HEAD"
-    IS_DOOM = os.environ.get("IS_DOOM_DAY", True)
+    IS_DOOM = (os.environ.get("IS_DOOM_DAY") == True)
 
     repos = get_repos_with_workflows(target_type, target_input, target_branch)
 
