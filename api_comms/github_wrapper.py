@@ -1,5 +1,6 @@
 import os
 import sys
+import pydash as _
 import requests
 from lib.logger import AuditLogger
 from lib.reporter import write_to_file
@@ -67,6 +68,13 @@ class GHWrapper:
                     )
         return repo_workflows
 
+    def action_node_parser(self, repo_node):
+        action_name = repo_node["nameWithOwner"]
+        action_body = _.get(repo_node, "yml")
+        if action_body is None:
+            action_body = action_body["text"]
+        return {"name": action_name, "content": action_body}
+
     def get_single_repo(self, repo_name, branch_name) -> dict:
         repos_all = {}
         repo_query = return_query("repository", repo_name, branch_name)
@@ -80,6 +88,20 @@ class GHWrapper:
             else:
                 write_to_file(f"* Repo {repo_name} has no workflow.  ")
         return repos_all
+
+    def get_action_definition(self, repo_name:str) -> dict:
+        actions_all = {}
+        action_query = return_query("action", repo_name)
+        actions = self.call_graphql(action_query)
+        if actions.get("errors") is None:
+            action_node = actions["data"]["repository"]
+            repo_name = action_node["nameWithOwner"]
+            repo_actions = self.action_node_parser(action_node)
+            if repo_actions:  # this repo has workflows
+                actions_all[repo_name] = repo_actions
+            else:
+                write_to_file(f"* Repo {repo_name} has no `actions.yml` or `action.yaml` file.  ")
+        return actions_all
 
     def get_multiple_repos(self, target_name, branch_name, target_type="org"):
         AuditLogger.warning(

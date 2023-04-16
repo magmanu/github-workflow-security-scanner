@@ -11,23 +11,13 @@ from auditor.checkers import (
     check_rce_vuln,
     check_pwn_requests,
     get_deprecated_commands,
-    get_workflow_actions
 )
 
 
 vuln_analyzer = WorkflowVulnAudit()
 
-def start_scan(target_type, target_input, target_branch, IS_DOOM):
-    gh = GHWrapper()
+def start_scan(repos:list, IS_DOOM:bool) -> int:
     vuln_count = 0
-
-    if target_type == "repo":
-        repos = gh.get_single_repo(repo_name=target_input, branch_name=target_branch)
-    else:
-        count, repos = gh.get_multiple_repos(
-            target_name=target_input, branch_name=target_branch, target_type=target_type
-        )
-        AuditLogger.info(f"Metric: Scanning total {count} repos")
 
     for repo_name in repos:
         AuditLogger.warning(
@@ -60,16 +50,6 @@ def workflow_analyzer(content: str, IS_DOOM:bool) -> dict[str, list]:
     wrkfl = WorkflowParser(content)
 
     result, job_elements = breakdown_jobs(wrkfl)
-
-    if IS_DOOM:
-        actions = get_workflow_actions(job_elements)
-        for action in actions:
-            action = action.split("@")
-            target_type = "repo"
-            target_input = action[0]
-            target_branch = "HEAD"
-            IS_DOOM = False
-            start_scan(target_type, target_input, target_branch, IS_DOOM)
 
     dangerous_triggers = get_dangerous_triggers(triggers=wrkfl.triggers)
 
@@ -149,7 +129,7 @@ def get_job_elements_with_id(
 def get_steps(environs: dict, job: dict) -> list:
     steps = _.get(job, "steps")
     if not steps:
-        steps = job
+        steps = [job]
     try:
         environs.update(_.get(job, "env", {}))
     except:

@@ -21,10 +21,10 @@ class WorkflowParser:
         self.secrets = self.get_secrets()
         self.jobs = self.get_jobs()
         self.steps = self.get_steps_for_job()
-        self.all_actions = self.get_step_element("actions")
-        self.all_run_commands = self.get_step_element("run_commands")
-        self.all_actions_args = self.get_step_element("actions_args")
-        self.all_steps_vars = self.get_step_element("steps_vars")
+        self.all_actions = self.get_my_step_element("actions")
+        self.all_run_commands = self.get_my_step_element("run_commands")
+        self.all_actions_args = self.get_my_step_element("actions_args")
+        self.all_steps_vars = self.get_my_step_element("steps_vars")
 
     def get_event_triggers(self) -> list:
         if self.safe_yml_file.get(True, None):
@@ -47,7 +47,7 @@ class WorkflowParser:
         for job in self.jobs:
             return job.get("steps", None)
 
-    def get_step_element(self, element_name: str) -> list:
+    def get_my_step_element(self, element_name: str) -> list:
         """Retrieves all <element> for the workflow, not only for a step.
         Acceptable element_name: "actions", "run_commands", "actions_args", "steps_vars"
         """
@@ -61,9 +61,14 @@ class WorkflowParser:
             "actions_args": "with",
             "steps_vars": "env"
         }
-        for step in self.steps:
-            if element:= step.get(mapping[element_name], None):
-                all_instances.append(element)
+        if self.steps:
+            for step in self.get_steps_for_job():
+                if element:= step.get(mapping[element_name], None):
+                    all_instances.append(element)
+        else:
+            for job in self.jobs:
+                if element:=job.get(mapping[element_name], None):
+                    all_instances.append(element)
         return all_instances
 
     def get_step_elements(self, step: dict) -> tuple:

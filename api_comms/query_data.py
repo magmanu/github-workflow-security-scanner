@@ -1,6 +1,8 @@
-def return_query(query_type, name, branch, after=None):
+import pydash as _
+
+def return_query(query_type, name, branch="", after=None):
     if query_type == "repository":
-        owner, name = name.split("/")
+        owner, name = _.take(name.split("/"), 2)
 
         return f"""query {{
                     repository(owner: "{owner}",name: "{name}") {{
@@ -16,6 +18,25 @@ def return_query(query_type, name, branch, after=None):
                                         }}
                                     }}
                                 }}
+                            }}
+                        }}
+                    }}
+        }}"""
+    if query_type == "action":
+        owner, name = name.split("/")
+        return f"""query {{
+                    repository(owner: "{owner}",name: "{name}") {{
+                        nameWithOwner
+                        yml: object(expression: "HEAD:action.yml") {{
+                            ... on Blob {{
+                                text
+                                byteSize
+                            }}
+                        }}
+                        yaml: object(expression: "HEAD:action.yaml") {{
+                            ... on Blob {{
+                                text
+                                byteSize
                             }}
                         }}
                     }}
